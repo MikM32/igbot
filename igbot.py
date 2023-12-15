@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as COptions
 from selenium.webdriver.firefox.options import Options as FOptions
 from selenium.webdriver.chrome.service import Service as CService
-from selenium.webdriver.chrome.service import Service as FService
+from selenium.webdriver.firefox.service import Service as FService
 import default_browser
 
 def get_webdriver_path(browser_type: str) -> str:
