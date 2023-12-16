@@ -19,7 +19,7 @@ def get_webdriver_path(browser_type: str) -> str:
     elif "Firefox" in browser_type:
         webdriver_path+= "geckodriver.exe"
     else:
-        raise Exception("Navegador predeterminado no soportado")
+        raise UncompatibleDefaultBrowser(browser_type)
     
     return webdriver_path
 
@@ -42,11 +42,16 @@ class Browser:
             -
     """
     def __init__(self, is_def_browser: bool=True, *args: str):
-        self.def_browser = default_browser.get_browser_exepath()
-        if(is_def_browser):
-            self.webdriver_path = get_webdriver_path(self.def_browser)
-        else:
-            self.webdriver_path = args[0]
+
+        try:
+
+            self.def_browser = default_browser.get_browser_exepath()
+            if(is_def_browser):
+                self.webdriver_path = get_webdriver_path(self.def_browser)
+            else:
+                self.webdriver_path = args[0]
+        except Exception as e:
+            print('Error al obtener el webdriver: {}'.format(e))
 
         self.browser_handler = None
         self.options = None
@@ -76,7 +81,7 @@ class Browser:
         elif "Firefox" in self.def_browser:
             self._init_firefox()
         else:
-            raise Exception("Navegador predeterminado no soportado")
+            raise UncompatibleDefaultBrowser(self.def_browser)
         
     def wait(self):
         self._update_sleep_secs()
