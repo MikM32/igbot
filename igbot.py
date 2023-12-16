@@ -36,6 +36,8 @@ class IgBot:
         self.service = None
         self.sleep_secs = None
 
+
+    def init_browser_handler(self):
         if "Chrome" in self.def_browser:
             self.options = COptions()
             #self.options.add_argument("--user-data-dir={}".format(CHROME_USER_DATA))
@@ -76,15 +78,19 @@ class IgBot:
         self.sleep_secs = random.randint(5, 12)
 
     def close_browser_handler(self):
-        self.browser_handler.quit()
+        try:
+            self.browser_handler.quit()
+        except:
+            raise Exception("No se puede ejecutar el metodo close_browser_handler(): browser_handler no ha sido inicializado")
 
  
 
 def main():
     bot = IgBot()
-    bot.init_ig_main()
+    bot.init_browser_handler()
+    #bot.init_ig_main()
     #bot.login()
-    time.sleep(1000)
+    #time.sleep(1000)
     bot.close_browser_handler()
 
 if __name__ == "__main__":
