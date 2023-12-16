@@ -41,12 +41,12 @@ class Browser:
         -- Metodos:
             -
     """
-    def __init__(self, is_def_browser: bool=True, *args: str):
+    def __init__(self, *args: str):
 
         try:
 
             self.def_browser = default_browser.get_browser_exepath()
-            if(is_def_browser):
+            if(len(args) < 1):
                 self.webdriver_path = get_webdriver_path(self.def_browser)
             else:
                 self.webdriver_path = args[0]
@@ -109,9 +109,9 @@ class IgBot(Browser):
 
                 -login(user: str, pwd: str): inicia sesion con una cuenta en instagram 
     """
-    def __init__(self, is_def_browser: bool=True, *args: str):
+    def __init__(self, *args: str):
         self.username = None
-        super().__init__(is_def_browser, args)
+        super().__init__(args)
     
     def init_ig_main(self):
         self.browser_handler.implicitly_wait(5)
