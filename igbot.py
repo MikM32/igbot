@@ -46,7 +46,7 @@ class Browser:
         try:
 
             self.def_browser = default_browser.get_browser_exepath()
-            if(len(args) < 1):
+            if(not args):
                 self.webdriver_path = get_webdriver_path(self.def_browser)
             else:
                 self.webdriver_path = args[0]
@@ -105,9 +105,14 @@ class IgBot(Browser):
     """
         Clase IgBot:
             --Metodos:
-                -init_if_main(): carga la pagina principal de instagram
+                - __init__(*args):
+                    args contiene un parametro opcional que seria la ruta del webdriver especificada por el usuario
 
-                -login(user: str, pwd: str): inicia sesion con una cuenta en instagram 
+                -init_if_main():
+                    carga la pagina principal de instagram
+
+                -login(user: str, pwd: str):
+                    inicia sesion con una cuenta en instagram 
     """
     def __init__(self, *args: str):
         self.username = None
@@ -137,7 +142,7 @@ def main():
     bot = IgBot()
     #bot.init_browser_handler()
     #bot.init_ig_main()
-    #bot.login()
+    #bot.login("usuario", "pwd")
     #time.sleep(100000)
     bot.close_browser_handler()
 
