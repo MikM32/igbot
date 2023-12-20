@@ -8,7 +8,20 @@ class UncompatibleDefaultBrowser(Exception):
 
 class NotInitizalizedHandler(Exception):
 
-    def __init__(self, handler: any):
+    def __init__(self):
 
         self.msg = " El Handler no ha sido inicializado."
+        super().__init__(self.msg)
+
+class CookiesDontExists(Exception):
+
+    def __init__(self, social_pre: str):
+
+        self.msg = "No se pueden cargar las cookies para {} porque no existe en el directorio 'Galletas'.".format(social_pre.upper())
+        super().__init__(self.msg)
+
+class InstagramBadPassword(Exception):
+
+    def __init__(self):
+        self.msg = "La password ingresada es incorrecta."
         super().__init__(self.msg)

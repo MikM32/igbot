@@ -5,9 +5,12 @@ from selenium.webdriver.firefox.options import Options as FOptions
 from selenium.webdriver.chrome.service import Service as CService
 from selenium.webdriver.firefox.service import Service as FService
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 
 import default_browser
 import time, random
+import json
+
 from bot_exceptions import *
 from constants import *
 
@@ -41,17 +44,15 @@ class Browser:
         -- Metodos:
             -
     """
-    def __init__(self, *args: str):
+    def __init__(self, *args):
+        self.webdriver_path = None
+        self.def_browser = None
 
-        try:
-
-            self.def_browser = default_browser.get_browser_exepath()
-            if(not args):
-                self.webdriver_path = get_webdriver_path(self.def_browser)
-            else:
-                self.webdriver_path = args[0]
-        except Exception as e:
-            print('Error al obtener el webdriver: {}'.format(e))
+        self.def_browser = default_browser.get_browser_exepath()
+        if(not args[0]):
+             self.webdriver_path = get_webdriver_path(self.def_browser)
+        else:
+            self.webdriver_path = args[0][0]
 
         self.browser_handler = None
         self.options = None
@@ -83,6 +84,29 @@ class Browser:
         else:
             raise UncompatibleDefaultBrowser(self.def_browser)
         
+    def save_cookies(self, pre: str):
+
+        cookies = self.browser_handler.get_cookies()
+
+        with open(COOKIES_PATH+pre+'_cookies.json', 'w') as file_cookie:
+            json.dump(cookies, file_cookie)
+
+    def load_cookies(self, pre: str):
+
+        try:
+            with open(COOKIES_PATH+pre+'_cookies.json', 'r') as file_cookie:
+                cookies = json.load(file_cookie)
+
+            for cookie in cookies:
+                self.browser_handler.add_cookie(cookie)
+            self._refresh()
+
+        except FileNotFoundError:
+            raise CookiesDontExists(pre)     
+
+    def _refresh(self):
+        self.browser_handler.refresh()      
+        
     def wait(self):
         self._update_sleep_secs()
         time.sleep(self.sleep_secs)
@@ -92,8 +116,8 @@ class Browser:
 
     def close_browser_handler(self):
         try:
-            if(self.browser_handler == None):
-                raise NotInitizalizedHandler(self.browser_handler)
+            if(not self.browser_handler): #self.browser_handler == None
+                raise NotInitizalizedHandler()
             
             self.browser_handler.quit()
             
@@ -101,6 +125,8 @@ class Browser:
             print("No se puede ejecutar el metodo close_browser_handler(): {}".format(e))
 
 
+#--------------------------------------------------------------------------------------------
+            
 class IgBot(Browser):
     """
         Clase IgBot:
@@ -114,7 +140,7 @@ class IgBot(Browser):
                 -login(user: str, pwd: str):
                     inicia sesion con una cuenta en instagram 
     """
-    def __init__(self, *args: str):
+    def __init__(self, *args):
         self.username = None
         super().__init__(args)
     
@@ -122,7 +148,7 @@ class IgBot(Browser):
         self.browser_handler.implicitly_wait(5)
         self.browser_handler.get(IG_URL)
 
-    def login(self, user:str, pwd:str):
+    def login(self, user:str, pwd:str, sv_cookies: bool=False):
         self.username = user
         self.wait()
 
@@ -134,16 +160,24 @@ class IgBot(Browser):
 
         login_button = self.browser_handler.find_element(By.XPATH, LOGIN_BUTTON_XPATH)
         login_button.click()
-
         self.wait()
+
+        try:
+            login_msg = self.browser_handler.find_element(By.XPATH, LOGIN_ERROR_MSG_XPATH)
+            if LOGIN_INCORRECT_PWD_MSG in login_msg.text:
+                raise InstagramBadPassword()
+            self.save_cookies('ig')
+
+        except NoSuchElementException:
+            pass
 
 
 def main():
     bot = IgBot()
-    #bot.init_browser_handler()
-    #bot.init_ig_main()
-    #bot.login("usuario", "pwd")
-    #time.sleep(100000)
+    bot.init_browser_handler()
+    bot.init_ig_main()
+    bot.login("usuario", "pwdsxasdas")
+    time.sleep(100000)
     bot.close_browser_handler()
 
 if __name__ == "__main__":
