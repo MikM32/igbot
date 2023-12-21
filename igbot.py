@@ -30,7 +30,7 @@ class Browser:
     """
         Clase Browser:
 
-        -- atributos:
+        -- propiedades:
             -browser_handler: handler del navegador
 
             -def_browser: cadena que contiene el directorio donde se encuentra el ejecutable del navegador predeterminado
@@ -39,7 +39,7 @@ class Browser:
 
             -service: objeto que contiene la informacion del webdriver que sera utilizado por el browser_handler
 
-            -sleep_secs: entero que contiene la cantidad de segundos que usara la funcion IgBot.wait()
+            -sleep_secs: entero que contiene la cantidad de segundos que usara la funcion Browser.wait()
 
         -- Metodos:
             -
@@ -65,7 +65,8 @@ class Browser:
         self.options.add_argument('--profile-directory=Default')
 
         #Este parametro evita que aparezca el mensaje "Un software automatizado esta controlando chrome"
-        self.options.add_experimental_option('excludeSwitches', ["enable-automation"]) 
+        self.options.add_experimental_option('excludeSwitches', ["enable-automation"])
+
         self.options.binary_location = self.def_browser
         self.service = CService(executable_path=self.webdriver_path)
         self.browser_handler = webdriver.Chrome(options=self.options, service=self.service)
@@ -88,26 +89,37 @@ class Browser:
 
         cookies = self.browser_handler.get_cookies()
 
-        with open(COOKIES_PATH+pre+'_cookies.json', 'w') as file_cookie:
+        with open(COOKIES_PATH+pre+'_cookies.json', 'w+') as file_cookie:
             json.dump(cookies, file_cookie)
 
     def load_cookies(self, pre: str):
-
+        """
+            Carga las cookies de sesion de una red social determinada
+            por el parametro 'pre', el cual es una cadena que contiene
+            el prefijo de la red social. Ejem: ig (Instagram), fb (Facebook),
+            ttk (TikTok), etc...
+        """
         try:
             with open(COOKIES_PATH+pre+'_cookies.json', 'r') as file_cookie:
                 cookies = json.load(file_cookie)
 
             for cookie in cookies:
                 self.browser_handler.add_cookie(cookie)
-            self._refresh()
+            self.refresh()
 
         except FileNotFoundError:
             raise CookiesDontExists(pre)     
 
-    def _refresh(self):
+    def refresh(self):
+        if not self.browser_handler:
+            raise NotInitizalizedHandler()
         self.browser_handler.refresh()      
         
     def wait(self):
+        """
+            Metodo que hace esperar al navegador unos segundos
+            (Retrasa la deteccion del bot)
+        """
         self._update_sleep_secs()
         time.sleep(self.sleep_secs)
 
@@ -126,15 +138,24 @@ class Browser:
 
 
 #--------------------------------------------------------------------------------------------
-            
+#--------------------------------------------------------------------------------------------
+                 
 class IgBot(Browser):
     """
         Clase IgBot:
+
+            --Propiedades:
+
+                -username: nombre de usuario de la cuenta con la que se esta trabajando
+
+                -is_logged: booleano que determina si la sesion ya esta iniciada
+
             --Metodos:
-                - __init__(*args):
+
+                -__init__(*args):
                     args contiene un parametro opcional que seria la ruta del webdriver especificada por el usuario
 
-                -init_if_main():
+                -init_ig_main():
                     carga la pagina principal de instagram
 
                 -login(user: str, pwd: str):
@@ -142,11 +163,40 @@ class IgBot(Browser):
     """
     def __init__(self, *args):
         self.username = None
+        self.is_logged = False
         super().__init__(args)
     
     def init_ig_main(self):
         self.browser_handler.implicitly_wait(5)
         self.browser_handler.get(IG_URL)
+
+    def accept_notifications(self, accept: bool):
+        if not self.is_logged:
+            raise NoLoggedSession('No se puede ejecutar el metodo: accept_notifications()')
+        
+        accept_button = self.browser_handler.find_element(By.XPATH, IG_NOTIFICATIONS_XPATH)
+        no_accept_button = self.browser_handler.find_element(By.XPATH, NO_IG_NOTIFICATIONS_XPATH)
+
+        if accept:
+            accept_button.click()
+        else:
+            no_accept_button.click()
+
+    def accept_session_cookies(self, save: bool):
+        
+        if not self.is_logged:
+            raise NoLoggedSession('No se puede ejecutar el metodo: accept_session_cookies()')
+        
+        accept_button = self.browser_handler.find_element(By.XPATH, SAVE_SCOOKIES_XPATH)
+        no_accept_button = self.browser_handler.find_element(By.XPATH, DONT_SAVE_SCOOKIES_XPATH)
+
+        if save:
+            accept_button.click()
+            self.save_cookies('ig')
+            self.wait()
+        else:
+            no_accept_button.click()
+        
 
     def login(self, user:str, pwd:str, sv_cookies: bool=False):
         self.username = user
@@ -158,26 +208,39 @@ class IgBot(Browser):
         username_input.send_keys(user)
         pwd_input.send_keys(pwd)
 
-        login_button = self.browser_handler.find_element(By.XPATH, LOGIN_BUTTON_XPATH)
-        login_button.click()
+        try:
+            login_button = self.browser_handler.find_element(By.XPATH, LOGIN_BUTTON_XPATH)
+            login_button.click()
+        except NoSuchElementException:
+            raise InvalidInputData()
+        
         self.wait()
 
         try:
             login_msg = self.browser_handler.find_element(By.XPATH, LOGIN_ERROR_MSG_XPATH)
             if LOGIN_INCORRECT_PWD_MSG in login_msg.text:
+                self.is_logged = False
                 raise InstagramBadPassword()
-            self.save_cookies('ig')
-
         except NoSuchElementException:
-            pass
+            self.is_logged = True
+
+        self.accept_session_cookies(sv_cookies)
+    
+    def login_with_cookies(self):
+
+        self.load_cookies('ig')
+        #self.refresh()
+        self.is_logged = True
 
 
 def main():
     bot = IgBot()
     bot.init_browser_handler()
     bot.init_ig_main()
-    bot.login("usuario", "pwdsxasdas")
-    time.sleep(100000)
+    #bot.login("user_name", "password123", True)
+    #bot.login_with_cookies()
+    #time.sleep(100000)
+    bot.load_cookies('ig')
     bot.close_browser_handler()
 
 if __name__ == "__main__":

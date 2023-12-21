@@ -25,3 +25,15 @@ class InstagramBadPassword(Exception):
     def __init__(self):
         self.msg = "La password ingresada es incorrecta."
         super().__init__(self.msg)
+
+class InvalidInputData(Exception):
+
+    def __init__(self):
+        self.msg = "El usuario o la password ingresada son invalidos."
+        super().__init__(self.msg)
+
+class NoLoggedSession(Exception):
+
+    def __init__(self, aditional_msg: str=''):
+        self.msg = "No se ha iniciado sesion con una cuenta. {}".format(aditional_msg)
+        super().__init__(self.msg)
