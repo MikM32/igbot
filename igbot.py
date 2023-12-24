@@ -174,28 +174,34 @@ class IgBot(Browser):
         if not self.is_logged:
             raise NoLoggedSession('No se puede ejecutar el metodo: accept_notifications()')
         
-        accept_button = self.browser_handler.find_element(By.XPATH, IG_NOTIFICATIONS_XPATH)
-        no_accept_button = self.browser_handler.find_element(By.XPATH, NO_IG_NOTIFICATIONS_XPATH)
+        try:
+            accept_button = self.browser_handler.find_element(By.XPATH, IG_NOTIFICATIONS_XPATH)
+            no_accept_button = self.browser_handler.find_element(By.XPATH, NO_IG_NOTIFICATIONS_XPATH)
 
-        if accept:
-            accept_button.click()
-        else:
-            no_accept_button.click()
+            if accept:
+                accept_button.click()
+            else:
+                no_accept_button.click()
+        except Exception:
+            print("No se encuentra la ventana de notificaciones.")
 
     def accept_session_cookies(self, save: bool):
         
         if not self.is_logged:
             raise NoLoggedSession('No se puede ejecutar el metodo: accept_session_cookies()')
         
-        accept_button = self.browser_handler.find_element(By.XPATH, SAVE_SCOOKIES_XPATH)
-        no_accept_button = self.browser_handler.find_element(By.XPATH, DONT_SAVE_SCOOKIES_XPATH)
-
-        if save:
-            accept_button.click()
-            self.save_cookies('ig')
+        try:
+            accept_button = self.browser_handler.find_element(By.XPATH, SAVE_SCOOKIES_XPATH)
+            no_accept_button = self.browser_handler.find_element(By.XPATH, DONT_SAVE_SCOOKIES_XPATH)
+            if save:
+                accept_button.click()
+            else:
+                no_accept_button.click()
+        except Exception:
+            print("No se encuentra la ventana de permanencia.")
+        finally:
+            self.save_cookies('ig_'.format(self.username))
             self.wait()
-        else:
-            no_accept_button.click()
         
 
     def login(self, user:str, pwd:str, sv_cookies: bool=False):
@@ -226,21 +232,36 @@ class IgBot(Browser):
 
         self.accept_session_cookies(sv_cookies)
     
-    def login_with_cookies(self):
+    def login_with_cookies(self, username: str):
 
-        self.load_cookies('ig')
+        self.username = username
+        self.load_cookies('ig_{}'.format(self.username))
         #self.refresh()
         self.is_logged = True
+    
+    def _search_rand_by_hashtag(self, hashtags: list):
+        
+        try:
+            search_button = self.browser_handler.find_element(By.XPATH, SEARCH_BUTTON_XPATH)
+            search_button.click()
+
+        except:
+            print("No se encuentra el boton de busqueda.")
 
 
 def main():
     bot = IgBot()
+
     bot.init_browser_handler()
     bot.init_ig_main()
-    #bot.login("user_name", "password123", True)
-    #bot.login_with_cookies()
-    #time.sleep(100000)
-    bot.load_cookies('ig')
+
+    #bot.login("username123", "password123.", True)
+    bot.login_with_cookies("darkm31")
+    bot.accept_notifications(False)
+    
+    bot._search_rand_by_hashtag([])
+    time.sleep(100000)
+
     bot.close_browser_handler()
 
 if __name__ == "__main__":

@@ -17,7 +17,7 @@ class CookiesDontExists(Exception):
 
     def __init__(self, social_pre: str):
 
-        self.msg = "No se pueden cargar las cookies para {} porque no existe en el directorio 'Galletas'.".format(social_pre.upper())
+        self.msg = "No se pueden cargar las cookies para {} porque no existen en el directorio 'galletas'.".format(social_pre.upper())
         super().__init__(self.msg)
 
 class InstagramBadPassword(Exception):
