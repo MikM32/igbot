@@ -37,3 +37,26 @@ class NoLoggedSession(Exception):
     def __init__(self, aditional_msg: str=''):
         self.msg = "No se ha iniciado sesion con una cuenta. {}".format(aditional_msg)
         super().__init__(self.msg)
+
+class ResultsNotFound(Exception):
+
+    def __init__(self, search:str):
+        self.msg = "No se encontraron resultados para la busqueda: {}.".format(search)
+        super().__init__(self.msg)
+
+class PageNotLoaded(Exception):
+    def __init__(self, page:str):
+        self.msg = "No se ha cargado la pagina: {}.".format(page)
+        super().__init__(self.msg)
+
+class IgUsernameNotFound(Exception):
+    def __init__(self):
+        self.msg = "Falta el nombre de usuario de instagram."
+        super().__init__(self.msg)
+
+class BrowserVpnNotEnable(Exception):
+    def __init__(self):
+        self.msg = "No se habilito el vpn para este navegador."
+        super().__init__(self.msg)
+def warning(msg:str):
+    print(f"Advertencia!: {msg}")
