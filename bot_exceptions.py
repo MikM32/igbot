@@ -58,6 +58,9 @@ class BrowserVpnNotEnable(Exception):
     def __init__(self):
         self.msg = "No se habilito el vpn para este navegador."
         super().__init__(self.msg)
-        
+class WaitTypeException(Exception):
+    def __init__(self, type: str):
+        self.msg = f"El tipo de espera '{type}' no pertenece al conjunto de tipos validos. Los tipos validos son normal, small, micro y nano"
+        super().__init__(self.msg)
 def warning(msg:str):
     print(f"Advertencia!: {msg}")
