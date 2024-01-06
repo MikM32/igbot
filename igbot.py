@@ -9,23 +9,27 @@
         -durante todas las pruebas, instagram no ha detectado actividad sospechosa. Pero esto no quiere decir que no pueda detectarla.
         -El uso prolongado del bot puede levantar sospechas por parte de instagram, cosa que no me ha pasado hasta ahora por suerte.
 """
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options as COptions
-from selenium.webdriver.firefox.options import Options as FOptions
-from selenium.webdriver.chrome.service import Service as CService
-from selenium.webdriver.firefox.service import Service as FService
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
 
-import default_browser
 import time
 #import random
 import json
 import os
 import secrets
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options as COptions
+from selenium.webdriver.chrome.service import Service as CService
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.firefox.options import Options as FOptions
+from selenium.webdriver.firefox.service import Service as FService
+
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.common.exceptions import NoSuchElementException
+
+import default_browser
 
 from bot_exceptions import *
 from constants import *
@@ -306,13 +310,13 @@ class IgBot(Browser):
 
             --Metodos:
 
-                -__init__(*args):
+                * __init__(*args):
                     args contiene un parametro opcional que seria la ruta del webdriver especificada por el usuario
-
-                -init_ig_main():
+                
+                * init_ig_main():
                     carga la pagina principal de instagram
-
-                -login(user: str, pwd: str):
+                
+                * login(user: str, pwd: str):
                     inicia sesion con una cuenta en instagram 
     """
     def __init__(self,
@@ -587,12 +591,23 @@ class IgBot(Browser):
                     account_list = followers_list
                     break
 
-            #falta el codigo para seguir la lista de cuentas
+            account_users = []
+            for account in account_list:
+                ac_span = account.find_element(By.CSS_SELECTOR, f'span[class="{AC_FOLLOWER_NAME_CLASSES}"]')
+                ac_follow_bt = account.find_element(By.CSS_SELECTOR, f'button[class="{AC_FOLLOWER_FOLLOW_BT_CLASSES}"]')
+                
+                self.browser_handler.execute_script('arguments[0].scrollIntoView()', ac_follow_bt)
+                account_users.append(ac_span.text)
+
+                following = ('Siguiendo' in ac_follow_bt.text) or ('Soli' in ac_follow_bt.text)
+                if not following:
+                    ac_follow_bt.click()
+                self.wait('micro')
 
         except NoSuchElementException as e:
             warning(f"follow_by_hashtag(): no se encuentra el link para ver seguidores de la cuenta.:{e}")
 
-        return account_list
+        return account_users
 #<------------------------------><------------------------------><------------------------------>
     
 
