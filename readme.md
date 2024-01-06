@@ -1,4 +1,13 @@
 # IgBot
+<<<<<<< HEAD
+=======
+**Funciones de la api:**
+- Iniciar sesión con una cuenta de instagram :white_check_mark:
+- Funcion para seguir una cantidad de cuentas determinada :white_check_mark:
+- Dejar de seguir cuentas si estas no te siguen en un plazo determinado de tiempo :x:
+- Crear una cuenta de instagram :x:
+- Subir posts a una cuenta :x:
+>>>>>>> experimental
 
 **Estado del bot:** *_En desarrollo._*
 

@@ -1,26 +1,44 @@
-""" Bot de Instagram """
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options as COptions
-from selenium.webdriver.firefox.options import Options as FOptions
-from selenium.webdriver.chrome.service import Service as CService
-from selenium.webdriver.firefox.service import Service as FService
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
+""" 
+    Bot para Instagram 
+    Autor: Miguel Matute
+    Fecha: 05/01/2024
 
-import default_browser
+    Descripcion:
+        -este bot usa la api de selenium para las interacciones con los diferentes elementos de las paginas y para web scrapping
+    Notas del autor:
+        -durante todas las pruebas, instagram no ha detectado actividad sospechosa. Pero esto no quiere decir que no pueda detectarla.
+        -El uso prolongado del bot puede levantar sospechas por parte de instagram, cosa que no me ha pasado hasta ahora por suerte.
+"""
+
 import time
 #import random
 import json
 import os
 import secrets
 
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options as COptions
+from selenium.webdriver.chrome.service import Service as CService
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.firefox.options import Options as FOptions
+from selenium.webdriver.firefox.service import Service as FService
+
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.common.exceptions import NoSuchElementException
+
+import default_browser
+
 from bot_exceptions import *
 from constants import *
 
 def get_webdriver_path(browser_type: str) -> str:
+    """
+    funcion que retorna la ruta del ejecutable del webdriver segun el tipo de navegador especificado en los parametros
+    """
+
     webdriver_path= WEBDRIVER_ROOT_PATH
 
     if "Chrome" in browser_type:
@@ -45,10 +63,21 @@ class Browser:
 
             -service: objeto que contiene la informacion del webdriver que sera utilizado por el browser_handler
 
-            -sleep_secs: entero que contiene la cantidad de segundos que usara la funcion Browser.wait()
+            -sleep_secs: entero que contiene la cantidad de segundos que usara la funcion Browser.wait() para esperar
 
         -- Metodos:
-            -
+
+            -init_browser_handler()
+
+            -save_cookies(pre: str)
+
+            -load_cookies(pre: str)
+
+            -delete_cookies()
+
+            -wait()
+
+            -close_browser_handler()
     """
     def __init__(self, browser_path: str='', use_vpn: bool = False, headless: bool = False):
         self.webdriver_path = None
@@ -94,8 +123,13 @@ class Browser:
         self.browser_handler = webdriver.Firefox(options=self.options, service=self.service)
 
     def init_browser_handler(self):
+        """"
+            Inicializa el webdriver
+        """
         if "Chrome" in self.def_browser:
             self._init_chrome()
+
+        #!!IMPORTANTE!!: Firefox perdera soporte por falta de metodos para evadir la deteccion de bots.
         elif "Firefox" in self.def_browser:
             self._init_firefox()
         else:
@@ -142,18 +176,37 @@ class Browser:
             raise NotInitizalizedHandler()
         self.browser_handler.refresh()      
         
-    def wait(self):
+    def wait(self, type: str=''):
         """
             Metodo que hace esperar al navegador unos segundos
             (Dificulta la deteccion del bot)
+            type: parametro que representa la forma en la que se refrescan los segundos de espera (tiempo de espera normal, pequeño, micro o nano)
         """
-        self._update_sleep_secs()
+        int_interval = 2
+        int_offset = 0
+        float_interval = 9 
+
+        if not type:
+            int_offset = 4
+        elif 'small' in type:
+            int_offset = 2
+        elif 'micro' in type:
+            int_interval = 1
+            int_offset = 1
+            float_interval = 5
+        elif 'nano' in type:
+            int_interval = 1
+            int_offset = 0.2
+            float_interval = 2
+        else:
+            raise WaitTypeException(type)
+
+        self._update_sleep_secs(float_interval, int_interval, int_offset)
         time.sleep(self.sleep_secs)
-
-    def _update_sleep_secs(self):
-
-        float_part = secrets.randbelow(9) / 10
-        int_part = secrets.randbelow(6) + 4
+    
+    def _update_sleep_secs(self, float_interval: int, int_interval: int, int_offset: int):
+        float_part = secrets.randbelow(float_interval) / 10
+        int_part = secrets.randbelow(int_interval) + int_offset
         self.sleep_secs = int_part + float_part
 
     def close_browser_handler(self):
@@ -163,9 +216,87 @@ class Browser:
             
         self.browser_handler.quit()
 
+#<------------------------------><------------------------------><------------------------------>
+class UrbanVpn:
+    
+    def __init__(self,
+                 h_browser: webdriver.Chrome,
+                 #country: str,
+                 #ad_block: bool,
+                 #anti_phish: bool
+                 ):
+        self.browser_handler = h_browser
+        #self.country = country
+        #self.ad_block = ad_block
+        #self.anti_phish = anti_phish
+        self.__is_in_page = False
 
-#--------------------------------------------------------------------------------------------
-#--------------------------------------------------------------------------------------------
+        
+    def init_page(self):
+        self.browser_handler.implicitly_wait(4)
+        self.browser_handler.get(URBAN_VPN_LINK)
+        self.__is_in_page = True
+        
+        WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.number_of_windows_to_be(2))
+        current_handle = self.browser_handler.current_window_handle
+        
+        for handle in self.browser_handler.window_handles:
+            if handle != current_handle:
+                self.browser_handler.switch_to.window(handle)
+                self.browser_handler.close()
+                break
+        self.browser_handler.switch_to.window(current_handle)
+        self.accept_terms()
+        
+    
+    def accept_terms(self):
+        WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located((By.CLASS_NAME, 'promotion__text')))
+        
+        try:
+            terms_button = self.browser_handler.find_element(By.CLASS_NAME, 'consent-text-controls__action')
+            terms_button.click()
+            self.browser_handler.implicitly_wait(1)
+            
+            #self.browser.save_cookies('vpn')
+        except NoSuchElementException:
+            #warning('no cargo la pagina para aceptar terminos')
+            pass
+        
+
+    def activate(self):
+        
+        if not self.__is_in_page:
+            raise PageNotLoaded(URBAN_VPN_LINK)
+        try:
+            c_locator = (By.CSS_SELECTOR, f'li[class="{LOCATION_ITEM_CLASS}"]')
+            s_locator = (By.CSS_SELECTOR, f'div[class="{SELECTION_INPUT_CLASSES}"]')
+            b_locator = (By.CSS_SELECTOR, f'div[class="{SELECTION_BOX_CLASSES}"]')
+            selection_input =  WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(s_locator))
+            selection_input.click()
+            selection_box = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(b_locator))
+            countries_list =  WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(c_locator))
+            
+            index = secrets.randbelow(len(countries_list))
+            self.browser_handler.execute_script("arguments[0].scrollIntoView();", countries_list[index])
+            countries_list[index].click()
+
+            #run_button = self.browser_handler.find_element(By.CLASS_NAME, 'play-button--play')
+            #run_button.click()
+
+            WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located((By.CLASS_NAME, 'play-button--pause')))
+            print('listo')
+        except NoSuchElementException:
+            print('No se encontraron')
+
+    def deactivate(self):
+        stop_button = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located((By.CLASS_NAME, 'play-button--pause')))
+        stop_button.click()
+
+    def close(self):
+        self.__is_in_page = False
+    
+
+#<------------------------------><------------------------------><------------------------------>
 
 class IgBot(Browser):
     """
@@ -179,13 +310,13 @@ class IgBot(Browser):
 
             --Metodos:
 
-                -__init__(*args):
+                * __init__(*args):
                     args contiene un parametro opcional que seria la ruta del webdriver especificada por el usuario
-
-                -init_ig_main():
+                
+                * init_ig_main():
                     carga la pagina principal de instagram
-
-                -login(user: str, pwd: str):
+                
+                * login(user: str, pwd: str):
                     inicia sesion con una cuenta en instagram 
     """
     def __init__(self,
@@ -197,6 +328,7 @@ class IgBot(Browser):
         
         self.username = username
         self.pwd = pwd
+        self.vpn = None
         self.is_logged = False
         self.__is_in_page = False
 
@@ -212,8 +344,17 @@ class IgBot(Browser):
     #            flg = True
     #            break
     #    return flg
+        
+    def _init_vpn(self):
+        self.vpn = UrbanVpn(self.browser_handler)
+        self.vpn.init_page()
+        self.vpn.accept_terms()
+        self.vpn.activate()
+        self.wait('micro')
 
     def init_ig(self, preload_cookies:bool = True):
+        if self.use_vpn:
+            self._init_vpn()
         self.browser_handler.implicitly_wait(5)
         if preload_cookies:
             if self.username:
@@ -270,7 +411,7 @@ class IgBot(Browser):
         if not self.__is_in_page:
             raise PageNotLoaded(IG_URL)
         if self.is_logged:
-            warning('No se puede iniciar sesion porque ya se ha iniciado sesion con una cuenta, debe cerrar sesion primero.')
+            warning('login(): No se puede iniciar sesion porque ya se ha iniciado sesion con una cuenta, debe cerrar sesion primero.')
             return
         
         username_input = self.browser_handler.find_element(By.XPATH, USER_INPUT_XPATH)
@@ -298,7 +439,9 @@ class IgBot(Browser):
         self.accept_notifications(False)
     
     def search_for(self, searching:str):
-
+        """
+            Busca cuentas o hashtags por medio de la barra de busqueda de la pagina.
+        """
         if not self.is_logged:
             raise NoLoggedSession("No se pueden buscar cuentas si no se ha iniciado sesion con una cuenta previamente.")
         
@@ -310,6 +453,7 @@ class IgBot(Browser):
             warning(f'search_for(): no se encontro el boton de busqueda.:{e}')
         
         try:
+            self.wait()
             search_input = self.browser_handler.find_element(By.CSS_SELECTOR, 'input')
             search_input.send_keys(searching)
             search_input.send_keys(Keys.ENTER)
@@ -317,8 +461,20 @@ class IgBot(Browser):
         except NoSuchElementException as e:
             warning(f'search_for(): no se ha encontrado el input de busqueda.{e}')
         
+        try:
+            self.wait()
+            element_located = EC.presence_of_element_located
+            locator = (By.CSS_SELECTOR, f'a[class="{SEARCH_CANDIDATE_CLASSES}"]')
+            result_link = WebDriverWait(self.browser_handler, WAIT_MAX).until(element_located(locator))
+            result_link.click()
+        except Exception as e:
+            warning(repr(e))
+        
         
     def logout(self):
+        """
+        Cierra la sesion actual.
+        """
         if not self.is_logged:
             raise NoLoggedSession('logout(): No se puede cerrar una sesion si no se ha iniciado sesion antes.')
         self.username = ''
@@ -338,22 +494,36 @@ class IgBot(Browser):
         
 
     
-    def follow_by_hashtag(self, hashtag: str) -> list[str]:
+    def follow_by_hashtag(self, hashtag: str, limit: int=30) -> list[str]:
         """
-    #       :follow_by_Hashtag(max_follow: int, hashatg: str) -> list[str]:
+    #       follow_by_Hashtag(hashtag: str, limit: int) -> list[str]
 
-            Funcion para seguir cuentas aleatorias a partir de los likes 
+            -Funcion para seguir cuentas aleatorias a partir de los likes 
             de un post aleatorio obtenido de un determinado hashtag.
 
-            Hay que tener cuidado a la hora de especificar el max_follow, ya que
-            instagram tiene un limite de 60 seguidas por hora y 150 por dia.
+    #       Parametros:
 
-            retorna la lista de cuentas seguidas.
+                <hashtag: str> = cadena que representa al hashtag por el cual se elegira una cuenta random
+                    para posteriormente revisar y seguir a sus seguidores. Hay menos posibilidades de que instagram
+                    detecte al bot si los hashtags que ingresas tienen que ver con la tematica de tu cuenta.
+
+                <limit: int> = limite de cuentas a seguir, se ha puesto como valor default 30 para probar con cuentas nuevas
+
+            -Hay que tener cuidado a la hora de especificar el max_follow, ya que
+            instagram tiene un limite de 60 seguidas por hora y 150 por dia.
+            Ademas es mas limitado cuando la cuenta es nueva.
+
+    #        Valor de retorno: list[str]
+
+                -retorna la lista de cuentas seguidas.
         """
-        if not self.is_logged:
-            raise NoLoggedSession('No se puede buscar cuentas por hashtag si no se ha iniciado sesion con una cuenta previamente.')
+        #if not self.is_logged:
+        #    raise NoLoggedSession('No se puede buscar cuentas por hashtag si no se ha iniciado sesion con una cuenta previamente.')
         
-        self.browser_handler.get(IG_EXPLORE_TAG+hashtag)
+        self.search_for(hashtag)
+        self.wait('small')
+
+        #self.browser_handler.get(IG_EXPLORE_TAG+hashtag)
         #Verifica si hay resultados para el hashtag ingresado
         try:
             self.browser_handler.find_element(By.XPATH, "//span[contains(text(),'{}')]".format(NOT_FOUND_MSG))
@@ -361,17 +531,20 @@ class IgBot(Browser):
         except NoSuchElementException:
             pass
         
-        self.wait()
+        #self.wait()
 
         account_list = []
 
         try:
-            rows = self.browser_handler.find_elements(By.CSS_SELECTOR, 'div[class="_ac7v  _al3n"]')
+            
+            rows_locator = (By.CSS_SELECTOR, 'div[class="_ac7v  _al3n"]')
+            rows = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(rows_locator))
             i = secrets.randbelow(len(rows)-1)
 
-            cols = rows[i].find_elements(By.CSS_SELECTOR, 'div[class="_aabd _aa8k  _al3l"]')
-
+            cols_locator = (By.CSS_SELECTOR, 'div[class="_aabd _aa8k  _al3l"]')
+            cols = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(cols_locator))
             j = secrets.randbelow(len(cols)-1)
+
             post_link = cols[j].find_element(By.TAG_NAME, 'a')
             post_link.click()
         except NoSuchElementException as e:
@@ -379,6 +552,7 @@ class IgBot(Browser):
 
 
         try:
+            self.wait('micro')
             initial_account = self.browser_handler.find_element(By.CSS_SELECTOR, f'a[class="{POST_ACCOUNT_LINK_CLASSES}"]')
             initial_account.click()
 
@@ -386,95 +560,67 @@ class IgBot(Browser):
             warning(f"follow_by_hashtag(): no se encuentra el link de la cuenta propietaria del post.:{e}")
         
         try:
-            self.wait()
-            #Espera hasta que cargue la seccion de informacion de la cuenta (Seguidos, Seguidores, etc) 
-            WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'ul[class="x78zum5 x1q0g3np xieb3on"]')))
-            #info_section = self.browser_handler.find_element(By.CSS_SELECTOR, 'ul[class="x78zum5 x1q0g3np xieb3on"]')
-            #subsections = info_section.find_element(By.CSS_SELECTOR, 'li')
+            self.wait('micro')
+            #Espera hasta que cargue la seccion de informacion de la cuenta (Seguidos, Seguidores, etc)
+            locator = (By.CSS_SELECTOR, f'ul[class="{AC_INFO_SECTION_CLASSES}"]')
+            WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
             
-            followers_link = self.browser_handler.find_element(By.CSS_SELECTOR, 'li[class="xl565be x1m39q7l x1uw6ca5 x2pgyrj"]:nth-child(2)')
+            followers_link = self.browser_handler.find_element(By.CSS_SELECTOR, f'li[class="{AC_FOLLOWERS_LINK_CLASSES}"]:nth-child(2)')
             followers_link.click()
+            self.wait()
 
-            #falta el codigo para seguir la lista de cuentas
+            #Reduce el tamaño de la ventana para que aparezca la scroll bar y asi poder actualizar la lista de seguidores
+            #   ya que por algun motivo que desconozco al bajar la scroll bar del widget de la lista de seguidores hasta el final
+            #   esta lista no se actualiza y solo se actualiza cuando estoy en el final y subo y bajo el scroll bar de la ventana de la pagina.
+            self.browser_handler.set_window_size(412, 400)
+            locator = (By.CSS_SELECTOR, f'div[class="{AC_FOLLOWERS_SEC_CLASS}"]')
+            followers_box = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
+
+            locator = (By.CSS_SELECTOR, f'div[class="{AC_FOLLOWER_CLASSES}"]')
+
+            #bucle que actualiza la lista de seguidores hasta que la cantidad coincida con el limite especificado previamente
+            while True:
+                self.browser_handler.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight)", followers_box)
+                self.wait('nano')
+                self.browser_handler.execute_script("window.scrollTo(0,0)")
+                self.wait('nano')
+                self.browser_handler.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+                self.wait('micro')
+                followers_list = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(locator))
+                if len(followers_list) >= limit:
+                    account_list = followers_list
+                    break
+
+            account_users = []
+            for account in account_list:
+                ac_span = account.find_element(By.CSS_SELECTOR, f'span[class="{AC_FOLLOWER_NAME_CLASSES}"]')
+                ac_follow_bt = account.find_element(By.CSS_SELECTOR, f'button[class="{AC_FOLLOWER_FOLLOW_BT_CLASSES}"]')
+                
+                self.browser_handler.execute_script('arguments[0].scrollIntoView()', ac_follow_bt)
+                account_users.append(ac_span.text)
+
+                following = ('Siguiendo' in ac_follow_bt.text) or ('Soli' in ac_follow_bt.text)
+                if not following:
+                    ac_follow_bt.click()
+                self.wait('micro')
 
         except NoSuchElementException as e:
             warning(f"follow_by_hashtag(): no se encuentra el link para ver seguidores de la cuenta.:{e}")
 
-        return account_list
-
-class UrbanVpn:
-    
-    def __init__(self,
-                 browser: Browser | IgBot,
-                 country: str,
-                 #ad_block: bool,
-                 #anti_phish: bool
-                 ):
-        self.browser = browser
-        if not self.browser.use_vpn:
-            raise BrowserVpnNotEnable()
-        self.browser_handler = self.browser.browser_handler
-        self.country = country
-        #self.ad_block = ad_block
-        #self.anti_phish = anti_phish
-        self.__is_in_page = False
-
-        
-    def init_page(self, preload_cookies:bool=True):
-        self.browser_handler.implicitly_wait(4)
-        if preload_cookies:
-            try:
-                self.browser.load_cookies('vpn_')
-            except CookiesDontExists:
-                warning('No existen cookies para el vpn')
-        self.browser_handler.get(URBAN_VPN_LINK)
-        self.__is_in_page = True
-        WebDriverWait(self.browser_handler, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'promotion__text')))
-        self.accept_terms()
-    
-    def accept_terms(self):
-
-        try:
-            terms_button = self.browser_handler.find_element(By.CLASS_NAME, 'consent-text-controls__action')
-            terms_button.click()
-            self.browser.wait()
-            self.browser.save_cookies('vpn_')
-        except NoSuchElementException:
-            #warning('no cargo la pagina para aceptar terminos')
-            pass
-        
-
-    def activate(self):
-        
-        if not self.__is_in_page:
-            raise PageNotLoaded(URBAN_VPN_LINK)
-        try:
-            country_input =  WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located((By.TAG_NAME, 'input')))
-            country_input.send_keys(self.country)
-
-            run_button = self.browser_handler.find_element(By.CLASS_NAME, 'play-button--play')
-            run_button.click()
-
-            #WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located((By.CLASS_NAME, 'play-button--pause')))
-        except NoSuchElementException:
-            print('No se encontraron')
-        
-    def close(self):
-        self.__is_in_page = False
+        return account_users
+#<------------------------------><------------------------------><------------------------------>
     
 
 def main():
-    bot = IgBot(use_vpn=True)
+    bot = IgBot()
     bot.username = 'darkm31'
     
-    #vpn = UrbanVpn(bot, 'Netherlands')
-    #vpn.init_page()
-    #vpn.activate()
-
-    #bot.init_ig()
-    #bot.login()
-    #bot.follow_by_hashtag('programacionvenezuela')
-    time.sleep(100000)
+    
+    bot.init_ig()
+    bot.accept_notifications(False)
+    #bot.search_for('#programacionvenezuela')
+    print(bot.follow_by_hashtag('#programacionvenezuela'))
+    time.sleep(1000)
 
     bot.close()
 

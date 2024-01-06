@@ -66,3 +66,17 @@ POST_MATRIX_SL = '#mount_0_0_XB>div>div>div.x9f619.x1n2onr6.x1ja2u2z>div>div>div
 POST_OWNER_ACCOUNT_SL = 'body>div.x1n2onr6.xzkaem6>div.x9f619.x1n2onr6.x1ja2u2z>div>div.x1uvtmcs.x4k7w5x.x1h91t0o.x1beo9mf.xaigb6o.x12ejxvf.x3igimt.xarpa2k.xedcshv.x1lytzrv.x1t2pt76.x7ja8zs.x1n2onr6.x1qrby5j.x1jfb8zj>div>div>div>div>div.xb88tzc.xw2csxc.x1odjw0f.x5fp0pe.x1qjc9v5.xjbqb8w.x1lcm9me.x1yr5g0i.xrt01vj.x10y3i5r.xr1yuqi.xkrivgy.x4ii5y1.x1gryazu.x15h9jz8.x47corl.xh8yej3.xir0mxb.x1juhsu6>div>article>div>div._ae6>div>div>div._aasi>div>header>div._aaqy._aaqz>div._aar0._ad95._aar1>div.x78zum5>div>div>span>span>div>a'
 POST_ACCOUNT_LINK_CLASSES = 'x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz  _acan _acao _acat _acaw _aj1- _ap30 _a6hd'
 #mount_0_0_xK > div > div > div.x9f619.x1n2onr6.x1ja2u2z > div > div > div.x78zum5.xdt5ytf.x1t2pt76.x1n2onr6.x1ja2u2z.x10cihs4 > div.x9f619.xvbhtw8.x78zum5.x168nmei.x13lgxp2.x5pf9jr.xo71vjh.x1uhb9sk.x1plvlek.xryxfnj.x1c4vz4f.x2lah0s.x1q0g3np.xqjyukv.x1qjc9v5.x1oa3qoh.x1qughib > div.x1gryazu.xh8yej3.x10o80wk.x14k21rp.x17snn68.x6osk4m.x1porb0y > div:nth-child(2) > section > main > div > header > section > ul
+AC_FOLLOWERS_LINK_CLASSES = 'xl565be x1m39q7l x1uw6ca5 x2pgyrj'
+AC_INFO_SECTION_CLASSES = 'x78zum5 x1q0g3np xieb3on'
+AC_FOLLOWERS_SEC_CLASS = '_aano'
+AC_FOLLOWER_CLASSES = 'x1dm5mii x16mil14 xiojian x1yutycm x1lliihq x193iq5w xh8yej3'
+
+SEARCH_CANDIDATE_CLASSES = 'x1i10hfl x1qjc9v5 xjbqb8w xjqpnuy xa49m3k xqeqjp1 x2hbi6w x13fuv20 xu3j5b3 x1q0q8m5 x26u7qi x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xdl72j9 x2lah0s xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r x2lwn1j xeuugli xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6 x16tdsg8 x1hl2dhg xggy1nq x1ja2u2z x1t137rt x1q0g3np x87ps6o x1lku1pv x1a2a7pz x1dm5mii x16mil14 xiojian x1yutycm x1lliihq x193iq5w xh8yej3'
+#ACCOUNT_BOX_CLASSES = 'x1dm5mii x16mil14 xiojian x1yutycm x1lliihq x193iq5w xh8yej3'
+
+ADD_EXTENSION_BUTTON_CLASSES = 'UywwFc-LgbsSe UywwFc-LgbsSe-OWXEXe-dgl2Hf'
+LOCATION_ITEM_CLASS = 'locations__item'
+SELECTION_INPUT_CLASSES = 'select-location__box select-location__box--search'
+SELECTION_BOX_CLASSES ='select-location__box select-location__box--locations select-location__box--locations-visible'
+AC_FOLLOWER_NAME_CLASSES = '_ap3a _aaco _aacw _aacx _aad7 _aade'
+AC_FOLLOWER_FOLLOW_BT_CLASSES = ' _acan _acap _acas _aj1- _ap30'
