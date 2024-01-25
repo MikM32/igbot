@@ -2,6 +2,7 @@
 #directorios y urls
 WEBDRIVER_ROOT_PATH = 'webdrivers/'
 COOKIES_PATH = WEBDRIVER_ROOT_PATH+'galletas/'
+COOKIES_DB = COOKIES_PATH+'galletas.db'
 CHROME_USER_DATA = WEBDRIVER_ROOT_PATH+'chromedata/User data'
 PROFILE_PATH = f'{CHROME_USER_DATA}/Default'
 EXTENSIONS_PATH = f'{PROFILE_PATH}/Extensions'
@@ -38,8 +39,10 @@ DONT_SAVE_SCOOKIES_XPATH = '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[
 #IG_NOTIFICATIONS_XPATH = '/html/body/div[7]/div[1]/div/div[2]/div/div/div/div/div[2]/div/div/div[3]/button[1]'
 
 #css selectors para los botones de la ventana emergente para aceptar notificaciones
-ACCEPT_NOTIFICATIONS_SL = 'button._a9--._ap36._a9_0'
-DONT_ACCEPT_NOTIFICATIONS_SL = 'button._a9--._ap36._a9_1'
+#button._a9--._ap36._a9_0
+ACCEPT_NOTIFICATIONS_SL = '_a9-- _ap36 _a9_0'
+#button._a9--._ap36._a9_1
+DONT_ACCEPT_NOTIFICATIONS_SL = '_a9-- _ap36 _a9_1'
 
 #xpaths para el boton de busqueda
 SEARCH_BUTTON_XPATH = '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/div/div/div/div/div[2]/div[2]/span/div/a'
@@ -80,3 +83,14 @@ SELECTION_INPUT_CLASSES = 'select-location__box select-location__box--search'
 SELECTION_BOX_CLASSES ='select-location__box select-location__box--locations select-location__box--locations-visible'
 AC_FOLLOWER_NAME_CLASSES = '_ap3a _aaco _aacw _aacx _aad7 _aade'
 AC_FOLLOWER_FOLLOW_BT_CLASSES = ' _acan _acap _acas _aj1- _ap30'
+
+MY_AC_DIV_CLASSES = 'x9f619 x3nfvp2 xr9ek0c xjpr12u xo237n4 x6pnmvc x7nr27j x12dmmrz xz9dl7a xn6708d xsag5q8 x1ye3gou x80pfx3 x159b3zp x1dn74xm xif99yt x172qv1o x10djquj x1lhsz42 xzauu7c xdoji71 x1dejxi8 x9k3k5o xs3sg5q x11hdxyr x12ldp4w x1wj20lx x1lq5wgf xgqcy7u x30kzoy x9jhf4c'
+NUM_SPAN_CLASSES = 'html-span xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1hl2dhg x16tdsg8 x1vvkbs'
+
+LEFT_BAR_DIV_CLASS = 'x1iyjqo2 xh8yej3'
+SECRET_IGM_INPUT_CLASS = '_ac69'
+POST_DESC_INPUT_CLASS = 'xw2csxc x1odjw0f x1n2onr6 x1hnll1o xpqswwc xl565be x5dp1im xdj266r x11i5rnm xat24cr x1mh8g0r x1w2wdq1 xen30ot x1swvt13 x1pi30zi xh8yej3 x5n08af notranslate'
+PLACE_INPUT_CLASS = '_aaie _aaig  _aaid _ag7n'
+SELECT_IMG_BT = ' _acan _acap _acas _aj1- _ap30'
+POST_NEXT_BT = '_ac7b _ac7d'
+POST_UPLOAD_SUCCESS = 'x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye x1ms8i2q xo1l8bm x5n08af x2b8uid x4zkp8e xw06pyt x10wh9bi x1wdrske x8viiok x18hxmgj'

@@ -5,17 +5,18 @@ def get_browser_name() -> str:
     with OpenKey(HKEY_CURRENT_USER, register_path) as key:
         return str(QueryValueEx(key, "ProgId")[0])
 
-""" obtiene solo el directiorio del navegador (ignora argumentos y comillas dobles)"""    
 def format_path(s:str) -> str:
-    res=''
-    for char in s[1:]:
-        if char == '"':
-            return res
-        else:
-            res+=char
+    """ obtiene solo el directiorio del navegador (ignora argumentos y comillas dobles)"""  
+    #res=''
+    #for char in s[1:]:
+    #    if char == '"':
+    #        return res
+    #    else:
+    #        res+=char
+    return s.split('"')[1]
 
-""" Obtiene el directorio completo del ejecutable del navegador predeterminado"""
 def get_browser_exepath() -> str:
+    """ Obtiene el directorio completo del ejecutable del navegador predeterminado"""
     browser = get_browser_name()
     register_path = r'{}\shell\open\command'.format(browser)
     fullpath = ''
