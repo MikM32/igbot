@@ -8,7 +8,7 @@
 - Obtener cantidad de seguidores actual. :white_check_mark:
 - Función para dejar de seguir cuentas (previamente seguidas por medio del metodo follow_by_hashtag()) en un plazo de tiempo dado. :x:
 - Crear una cuenta de instagram. :x:
-- Subir posts a una cuenta. :x:
+- Subir posts a una cuenta. :white_check_mark:
 
 **Nota:**
 >Hasta el momento solo puede iniciar sesión (_no probar tantas veces con una misma cuenta por riesgo de ban_)
