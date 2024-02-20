@@ -11,6 +11,7 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from bot_exceptions import CookiesDontExists
 
+
 KEY = '9a4cd918a18eea0c9e3f72203ecaafa1'
 
 def dontgonnatellyou(data: str) -> bytes:
@@ -40,8 +41,18 @@ def gonnatellyou(edata64:str) -> str:
 
     return data.decode('ansi')
 
-def db_create(db: str):
-    pass
+def db_init(db: str, social:str):
+    
+    with sqlite3.connect(db) as conn:
+        cur = conn.cursor()
+
+        test_sql = f"SELECT * FROM {social}_cookies"
+        new_tab_sql = f"CREATE TABLE {social}_cookies(Usuario VARCHAR, Enc_Cookies VARCHAR)"
+        try:
+            cur.execute(test_sql)
+        except:
+            cur.execute(new_tab_sql)
+            conn.commit()
 
 def db_load_cookies(db: str, social:str, username: str) -> list[dict]:
 

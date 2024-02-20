@@ -77,6 +77,8 @@ get_elements = lambda bhandler, locator: WebDriverWait(bhandler, WAIT_MAX).until
     funcion que espera 60 segundos a que todos los elementos especificador por el locator esten cargados luego devuelve la lista de los elementos 
 """
 
+get_clickable_element = lambda bhandler, locator: WebDriverWait(bhandler, WAIT_MAX).until(EC.element_to_be_clickable(locator))
+
 #<------------------------------><------------------------------><------------------------------>
 class Browser:
     """
@@ -124,7 +126,8 @@ class Browser:
         self.options = None
         self.service = None
         self.sleep_secs = None
-
+    
+        
     def _init_chrome(self):
         self.options = COptions()
         #full_userdata_path = os.path.join(os.getcwd(), CHROME_USER_DATA)
@@ -402,6 +405,9 @@ class IgBot(Browser):
         super().__init__(browser_path, use_vpn, headless)
         self.init_browser_handler()
 
+        self._init_paths()
+        self._init_db('instagram')
+
 
     #Solo ignoren este metodo XD
     #def _exist_usercookie(self, username: str) -> bool:
@@ -411,6 +417,13 @@ class IgBot(Browser):
     #            flg = True
     #            break
     #    return flg
+    def _init_paths(self):
+        if(not os.path.exists(COOKIES_PATH)):
+            os.mkdir(COOKIES_PATH)
+    
+    def _init_db(self, webname: str):
+        
+        data.db_init(COOKIES_DB, webname)
         
     def _init_vpn(self):
         self.vpn = UrbanVpn(self.browser_handler)
@@ -459,11 +472,12 @@ class IgBot(Browser):
         try:
             locator = (By.CSS_SELECTOR, f'button[class="{ACCEPT_NOTIFICATIONS_SL}"]')
             #accept_button = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
-            accept_button = get_element(self.browser_handler, locator)
+            #accept_button = get_element(self.browser_handler, locator)
+            accept_button = get_clickable_element(self.browser_handler, locator)
 
             locator = (By.CSS_SELECTOR, f'button[class="{DONT_ACCEPT_NOTIFICATIONS_SL}"]')
             #no_accept_button = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
-            no_accept_button = get_element(self.browser_handler, locator)
+            no_accept_button = get_clickable_element(self.browser_handler, locator)
             #accept_button = self.browser_handler.find_element(By.CSS_SELECTOR, ACCEPT_NOTIFICATIONS_SL)
             #no_accept_button = self.browser_handler.find_element(By.CSS_SELECTOR, DONT_ACCEPT_NOTIFICATIONS_SL)
 
@@ -471,6 +485,8 @@ class IgBot(Browser):
                 accept_button.click()
             else:
                 no_accept_button.click()
+            
+            #self.save_cookies('instagram', self.username)
         except Exception:
             warning("No se encuentra la ventana de notificaciones.")
 
@@ -495,7 +511,7 @@ class IgBot(Browser):
             warning("No se encuentra la ventana de permanencia.")
         finally:
             self.save_cookies('instagram', self.username)
-            self.wait()
+            self.wait('micro')
         
 
     def login(self, sv_cookies: bool=False, accept_nt: bool=False):
@@ -615,7 +631,7 @@ class IgBot(Browser):
         except TimeoutException:
             warning('open_following_list(): no se encontro el link para ver la lista de seguidos')
     
-    def follow_by_hashtag(self, hashtag: str, limit: int=30) -> list[str]:
+    def follow_by_hashtag(self, hashtag: str, like_posts: bool, limit: int=30) -> list[str]:
         """
     #       follow_by_Hashtag(hashtag: str, limit: int) -> list[str]
 
@@ -853,12 +869,15 @@ class IgBot(Browser):
     
 
 def main():
-    bot = IgBot()
+    bot = IgBot(headless=True)
     bot.username = 'darkm31'
+    #bot.pwd = 'password'
     
     bot.init_ig()
-    bot.accept_notifications(False)
-    bot.upload_post('C:/Users/Ines/Desktop/kk.png', 'Somethingsomethingsomething')
+    bot.wait('micro')
+    bot.show_window()
+    bot.accept_notifications(True)
+    #bot.upload_post('Desktop/kk.png', 'Somethingsomethingsomething')
     #print(bot.my_followers_num())
     #print(bot.follow_by_hashtag('#programacionvenezuela'))
     #time.sleep(1000)
