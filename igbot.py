@@ -259,6 +259,9 @@ class Browser:
             int_interval = 1
             int_offset = 0.2
             float_interval = 2
+        elif 'search' in type:
+            time.sleep(1.5)
+            return
         else:
             raise WaitTypeException(type)
 
@@ -743,6 +746,15 @@ class IgBot(Browser):
 
         return account_users
     
+    def like_posts(self, user: str, limit: int = 10):
+        """
+            metodo que da like a una cantidad de posts especificada por limit de una cuenta especificada por user
+        """
+        self.browser_handler.get(f"https://www.instagram.com/{user}")
+
+        #---------- En desarrollo ----------
+
+
     def open_my_profile(self):
         """
             abre la pagina del perfil de la cuenta que esta usando el bot
@@ -792,21 +804,34 @@ class IgBot(Browser):
         
         return followers_num
 
-    #def is_following_me(self, user:str) -> bool:
-    #    pass
-
-    #def are_following_me(self, users: list[str]) -> bool:
-    #    pass
-
     def unfollow_users(self, users: list[str]):
+        """
+        Esta funcion deja de seguir una lista de usuarios (users: list[str])
+        """
         self.open_my_profile()
         self.open_following_list()
 
+        for user in users:
+            try:
+                search_user_input = get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
+                search_user_input.send_keys(user)
+                search_user_input.send_keys(Keys.ENTER)
+
+                self.wait('search')
+                unfollow_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]'))
+                unfollow_bt.click()
+                accept_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{ACCEPT_UNFOLLOW}"]'))
+                accept_bt.click()
+            except Exception as e:
+                warning(f'no se encontro a {user}')
 
         
 
     def upload_post(self, post_img_path: str, post_txt: str=''):
-        
+        """
+            Esta funcion sube una publicacion a la cuenta, post_img_path es la cadena donde va la ruta de la imagen a postear 
+            y post_txt la cadena donde va la descripcion del post.
+        """
         self.wait('micro')
         try:
             locator = (By.CSS_SELECTOR, 'svg[aria-label="Nueva publicación"]')
@@ -858,9 +883,19 @@ class IgBot(Browser):
             self.check_challenge()
             warning('No se ha encontrado el boton para subir posts.')
 
-    def check_challenge(self):
+    def check_challenge(self) -> bool:
+        """
+            Metodo que verifica si instagram esta solicitando resolver un "desafio" o captcha para comprobar que no eres un bot
+
+            Se recomienda que despues de una sospecha por parte de ig la cantidad de cuentas a seguir o dejar de seguir y la cantidad de likes 
+            disminuya a la mitad o mas, de otro modo se corre el riesgo de otras penalizaciones como ban.
+        """
         if 'challenge' in self.browser_handler.current_url:
+            warning("Posible deteccion del bot: Se requiere verificacion por recaptcha")
             self.show_window()
+            return True
+        
+        return False
 
     def _check_login(self, admsg:str=''):
         if not self.is_logged:
@@ -869,14 +904,15 @@ class IgBot(Browser):
     
 
 def main():
-    bot = IgBot(headless=True)
+    bot = IgBot(headless=False)
     bot.username = 'darkm31'
     #bot.pwd = 'password'
     
     bot.init_ig()
-    bot.wait('micro')
-    bot.show_window()
+    #bot.wait('micro')
+    #bot.show_window()
     bot.accept_notifications(True)
+    bot.unfollow_users(['lucasmeloryt'])
     #bot.upload_post('Desktop/kk.png', 'Somethingsomethingsomething')
     #print(bot.my_followers_num())
     #print(bot.follow_by_hashtag('#programacionvenezuela'))
