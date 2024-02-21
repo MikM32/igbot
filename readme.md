@@ -6,7 +6,7 @@
 - Iniciar sesión con una cuenta de instagram. :white_check_mark:
 - Función para seguir una cantidad de cuentas determinada. :white_check_mark:
 - Obtener cantidad de seguidores actual. :white_check_mark:
-- Función para dejar de seguir cuentas (previamente seguidas por medio del metodo follow_by_hashtag()) en un plazo de tiempo dado. :x:
+- Función para dejar de seguir cuentas (previamente seguidas por medio del metodo follow_by_hashtag()) en un plazo de tiempo dado. :white_check_mark:
 - Crear una cuenta de instagram. :x:
 - Subir posts a una cuenta. :white_check_mark:
 
@@ -22,3 +22,8 @@
 **ACTUALIZACION 07/01/2024. Aviso Importante!**
 >Una prueba del bot en modo headless levanto sospechas por parte de instagram y me puso a resolver un captcha
 >Al parecer correr el bot con dicho modo es peligroso, por lo que en estos momentos se ejecutaran todas las pruebas sin el headless
+
+**ACTUALIZACION 20/02/2024.**
+>El metodo para aceptar o denegar las notificaciones funciona solo si se presiona alguna parte aleatoria de la pantalla (Por algun motivo que desconozco)
+
+>Se solucionaron errores relacionados al manejo de rutas del bot
