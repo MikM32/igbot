@@ -746,12 +746,35 @@ class IgBot(Browser):
 
         return account_users
     
-    def like_posts(self, user: str, limit: int = 10):
+    def like_posts(self, user: str, limit: int = 3):
         """
             metodo que da like a una cantidad de posts especificada por limit de una cuenta especificada por user
         """
+        prev_url = self.browser_handler.current_url
         self.browser_handler.get(f"https://www.instagram.com/{user}")
+        try:
+            post_rows = get_elements(self.browser_handler, (By.CSS_SELECTOR, f'div[class="{POST_ROW}"]'))
+            counter = 0
 
+            for row in post_rows:
+                post_links = row.find_elements(By.TAG_NAME, 'a')
+                for link in post_links:
+                    if(counter >= limit):
+                        break
+                    link.click()
+
+                    like_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, 'svg[aria-label="Me gusta"]'))
+                    like_bt.click()
+
+                    self.wait('nano')
+                    close_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, 'svg[aria-label="Cerrar"]'))
+                    close_bt.click()
+                    counter+=1
+
+        except Exception as e:
+            warning(f'No se pudo darle like a un post de la cuenta: {user}')
+        finally:
+            self.browser_handler.get(prev_url)
         #---------- En desarrollo ----------
 
 
@@ -912,7 +935,8 @@ def main():
     #bot.wait('micro')
     #bot.show_window()
     bot.accept_notifications(True)
-    bot.unfollow_users(['lucasmeloryt'])
+    #bot.unfollow_users(['lucasmeloryt'])
+    bot.like_posts('lucasmeloryt')
     #bot.upload_post('Desktop/kk.png', 'Somethingsomethingsomething')
     #print(bot.my_followers_num())
     #print(bot.follow_by_hashtag('#programacionvenezuela'))

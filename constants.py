@@ -97,3 +97,5 @@ POST_UPLOAD_SUCCESS = 'x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9
 ACC_SEARCH_INPUT_DIV = 'xwib8y2 x1swvt13 x1pi30zi x1y1aw1k'
 UNFOLLOW_BT = ' _acan _acap _acat _aj1- _ap30'
 ACCEPT_UNFOLLOW = '_a9-- _ap36 _a9-_'
+ACC_FRAME = '_aa_y _aa_z _aa_-'
+POST_ROW = '_ac7v xzboxd6 xras4av xgc1b0m'
