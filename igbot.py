@@ -457,6 +457,10 @@ class IgBot(Browser):
         
         self.wait('micro')
         try:
+
+            locator = (By.CSS_SELECTOR, 'div[class="_a9-y"]')
+            msg_span = get_element(self.browser_handler, locator)
+            self.browser_handler.execute_script('arguments[0].click();', msg_span)
             locator = (By.CSS_SELECTOR, f'button[class="{ACCEPT_NOTIFICATIONS_SL}"]')
             #accept_button = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
             accept_button = get_element(self.browser_handler, locator)
@@ -642,12 +646,13 @@ class IgBot(Browser):
         #    raise NoLoggedSession('No se puede buscar cuentas por hashtag si no se ha iniciado sesion con una cuenta previamente.')
         
         self.search_for(hashtag)
-        self.wait('small')
+        self.wait('micro')
 
         #self.browser_handler.get(IG_EXPLORE_TAG+hashtag)
         #Verifica si hay resultados para el hashtag ingresado
         try:
-            self.browser_handler.find_element(By.XPATH, "//span[contains(text(),'{}')]".format(NOT_FOUND_MSG))
+            #self.browser_handler.find_element(By.XPATH, "//span[contains(text(),'{}')]".format(NOT_FOUND_MSG))
+            get_element(self.browser_handler, (By.XPATH, f"//span[contains(text(),'{NOT_FOUND_MSG}')]"))
             raise ResultsNotFound(hashtag)
         except NoSuchElementException:
             pass
@@ -661,22 +666,25 @@ class IgBot(Browser):
         try:
             
             rows_locator = (By.CSS_SELECTOR, 'div[class="_ac7v  _al3n"]')
-            rows = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(rows_locator))
+            #rows = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(rows_locator))
+            rows = get_elements(self.browser_handler, rows_locator)
             i = secrets.randbelow(len(rows)-1)
 
-            cols_locator = (By.CSS_SELECTOR, 'div[class="_aabd _aa8k  _al3l"]')
-            cols = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(cols_locator))
+            #cols_locator = (By.CSS_SELECTOR, 'div[class="_aabd _aa8k  _al3l"]')
+            #cols = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(cols_locator))
+            cols = rows[i].find_elements(By.CSS_SELECTOR, 'div[class="_aabd _aa8k  _al3l"]')
             j = secrets.randbelow(len(cols)-1)
 
             post_link = cols[j].find_element(By.TAG_NAME, 'a')
             post_link.click()
-        except NoSuchElementException as e:
+        except Exception as e:
             warning(f'follow_by_hashtag(): no se encuentran las filas de la matriz de posts.: {e}')
 
 
         try:
-            self.wait('micro')
-            initial_account = self.browser_handler.find_element(By.CSS_SELECTOR, f'a[class="{POST_ACCOUNT_LINK_CLASSES}"]')
+            self.wait('nano')
+            #initial_account = self.browser_handler.find_element(By.CSS_SELECTOR, f'a[class="{POST_ACCOUNT_LINK_CLASSES}"]')
+            initial_account = get_element(self.browser_handler, (By.CSS_SELECTOR, f'a[class="{POST_ACCOUNT_LINK_CLASSES}"]'))
             initial_account.click()
 
         except NoSuchElementException as e:
@@ -698,13 +706,15 @@ class IgBot(Browser):
 
             #bucle que actualiza la lista de seguidores hasta que la cantidad coincida con el limite especificado previamente
             while True:
-                self.browser_handler.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight)", followers_box)
-                self.wait('nano')
-                self.browser_handler.execute_script("window.scrollTo(0,0)")
-                self.wait('nano')
-                self.browser_handler.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-                self.wait('micro')
-                followers_list = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(locator))
+                # self.browser_handler.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight)", followers_box)
+                # self.wait('nano')
+                # self.browser_handler.execute_script("window.scrollTo(0,0)")
+                # self.wait('nano')
+                # self.browser_handler.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+                # self.wait('micro')
+                self._update_follow_list(followers_box)
+                #followers_list = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(locator))
+                followers_list = get_elements(self.browser_handler, locator)
                 if len(followers_list) >= limit:
                     account_list = followers_list
                     break
@@ -727,6 +737,14 @@ class IgBot(Browser):
 
         return account_users
     
+    def _update_follow_list(self, follow_box):
+        self.browser_handler.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight)", follow_box)
+        self.wait('nano')
+        self.browser_handler.execute_script("window.scrollTo(0,0)")
+        self.wait('nano')
+        self.browser_handler.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+        self.wait('micro')
+
     def open_my_profile(self):
         """
             abre la pagina del perfil de la cuenta que esta usando el bot
@@ -776,18 +794,43 @@ class IgBot(Browser):
         
         return followers_num
 
-    #def is_following_me(self, user:str) -> bool:
-    #    pass
-
-    #def are_following_me(self, users: list[str]) -> bool:
-    #    pass
-
     def unfollow_users(self, users: list[str]):
         self.open_my_profile()
         self.open_following_list()
-
-
         
+        try:
+            for user in users:
+                input_follow = get_element(self.browser_handler, (By.CSS_SELECTOR, f'input[class="{INPUT_FOLLOW}"]'))
+                input_follow.send_keys(user)
+                input_follow.send_keys(Keys.ENTER)
+
+                try:
+                    self.wait('nano')
+                    acc_box = self.browser_handler.find_element(By.CSS_SELECTOR, f'div[class="{AC_FOLLOWER_CLASSES}"]')
+                    unfollow_bt = acc_box.find_element(By.TAG_NAME, "button")
+                    unfollow_bt.click()
+                    self.wait('nano')
+
+                    accept_bt = self.browser_handler.find_element(By.CSS_SELECTOR, f'button[class="{AC_UNFOLLOW_ACCEPT_BT}"]')
+                    accept_bt.click()
+
+                    self._discard_searching()
+                    self.wait('nano')
+                except:
+                    #self.browser_handler.find_element(By.XPATH, f"//span[contains(text(),'{NOT_FOUND_MSG}')]")
+                    warning(f'No se encontro al usuario: {user} en la lista de seguidos')
+                    self._discard_searching()
+                    continue
+                        
+        except Exception as e:
+            warning(f'No se pueden dejar de seguir las cuentas: {e}')
+
+    def _discard_searching(self):
+        try:
+            discard_search_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'div[class="{DISCARD_SEARCH_BT}"]'))
+            discard_search_bt.click()
+        except:
+            warning('No se encontro el boton de descarte de busqueda')
 
     def upload_post(self, post_img_path: str, post_txt: str=''):
         
@@ -858,7 +901,10 @@ def main():
     
     bot.init_ig()
     bot.accept_notifications(False)
-    bot.upload_post('C:/Users/Ines/Desktop/kk.png', 'Somethingsomethingsomething')
+    users = ['jualopez3530', 'fernandolopezballera', 'yohanny_toyo', 'luis.quilarque.796', 'el_brian2024', 'mariodelacruz92', 'danivitri_01', 'kjhon.91', 
+'selelugo240', 'yahunathanalmerida', 'orfila9512', 'mirianyelabourgeonmarin', 'figuera8994', 'str.gz_blazzz', 'ballaluzrojas', 'ashli_bl', 'cases.pzo', 'zabadi_pzo', 'edinsonjosue5750', 'chrystopher.jimenez', 'henryvaldez899', 'daniellamoya.v', 'melanyale09', 'rebecanessii', 'daielantoniogittins', 'cristhianjaviersifontes', 'joseangel.gonzalezsoto', 'tsukibo_rgs', 'glorysmarpalma', 'silverwolfwa', 'josha.25', 'mariannys.moya', 'garcesdarielis', 'anthonypitter_29', 'francesco_carladi', 'do_rubmelys23']
+    bot.unfollow_users(users)
+    #bot.upload_post('C:/Users/Ines/Desktop/kk.png', 'Somethingsomethingsomething')
     #print(bot.my_followers_num())
     #print(bot.follow_by_hashtag('#programacionvenezuela'))
     #time.sleep(1000)
