@@ -77,6 +77,8 @@ get_elements = lambda bhandler, locator: WebDriverWait(bhandler, WAIT_MAX).until
     funcion que espera 60 segundos a que todos los elementos especificador por el locator esten cargados luego devuelve la lista de los elementos 
 """
 
+get_clickable_element = lambda bhandler, locator: WebDriverWait(bhandler, WAIT_MAX).until(EC.element_to_be_clickable(locator))
+
 #<------------------------------><------------------------------><------------------------------>
 class Browser:
     """
@@ -124,7 +126,8 @@ class Browser:
         self.options = None
         self.service = None
         self.sleep_secs = None
-
+    
+        
     def _init_chrome(self):
         self.options = COptions()
         #full_userdata_path = os.path.join(os.getcwd(), CHROME_USER_DATA)
@@ -256,6 +259,9 @@ class Browser:
             int_interval = 1
             int_offset = 0.2
             float_interval = 2
+        elif 'search' in type:
+            time.sleep(1.5)
+            return
         else:
             raise WaitTypeException(type)
 
@@ -402,6 +408,9 @@ class IgBot(Browser):
         super().__init__(browser_path, use_vpn, headless)
         self.init_browser_handler()
 
+        self._init_paths()
+        self._init_db('instagram')
+
 
     #Solo ignoren este metodo XD
     #def _exist_usercookie(self, username: str) -> bool:
@@ -411,6 +420,13 @@ class IgBot(Browser):
     #            flg = True
     #            break
     #    return flg
+    def _init_paths(self):
+        if(not os.path.exists(COOKIES_PATH)):
+            os.mkdir(COOKIES_PATH)
+    
+    def _init_db(self, webname: str):
+        
+        data.db_init(COOKIES_DB, webname)
         
     def _init_vpn(self):
         self.vpn = UrbanVpn(self.browser_handler)
@@ -463,11 +479,12 @@ class IgBot(Browser):
             self.browser_handler.execute_script('arguments[0].click();', msg_span)
             locator = (By.CSS_SELECTOR, f'button[class="{ACCEPT_NOTIFICATIONS_SL}"]')
             #accept_button = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
-            accept_button = get_element(self.browser_handler, locator)
+            #accept_button = get_element(self.browser_handler, locator)
+            accept_button = get_clickable_element(self.browser_handler, locator)
 
             locator = (By.CSS_SELECTOR, f'button[class="{DONT_ACCEPT_NOTIFICATIONS_SL}"]')
             #no_accept_button = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
-            no_accept_button = get_element(self.browser_handler, locator)
+            no_accept_button = get_clickable_element(self.browser_handler, locator)
             #accept_button = self.browser_handler.find_element(By.CSS_SELECTOR, ACCEPT_NOTIFICATIONS_SL)
             #no_accept_button = self.browser_handler.find_element(By.CSS_SELECTOR, DONT_ACCEPT_NOTIFICATIONS_SL)
 
@@ -475,6 +492,8 @@ class IgBot(Browser):
                 accept_button.click()
             else:
                 no_accept_button.click()
+            
+            #self.save_cookies('instagram', self.username)
         except Exception:
             warning("No se encuentra la ventana de notificaciones.")
 
@@ -499,7 +518,7 @@ class IgBot(Browser):
             warning("No se encuentra la ventana de permanencia.")
         finally:
             self.save_cookies('instagram', self.username)
-            self.wait()
+            self.wait('micro')
         
 
     def login(self, sv_cookies: bool=False, accept_nt: bool=False):
@@ -619,7 +638,7 @@ class IgBot(Browser):
         except TimeoutException:
             warning('open_following_list(): no se encontro el link para ver la lista de seguidos')
     
-    def follow_by_hashtag(self, hashtag: str, limit: int=30) -> list[str]:
+    def follow_by_hashtag(self, hashtag: str, like_posts: bool, limit: int=30) -> list[str]:
         """
     #       follow_by_Hashtag(hashtag: str, limit: int) -> list[str]
 
@@ -737,6 +756,38 @@ class IgBot(Browser):
 
         return account_users
     
+    def like_posts(self, user: str, limit: int = 3):
+        """
+            metodo que da like a una cantidad de posts especificada por limit de una cuenta especificada por user
+        """
+        prev_url = self.browser_handler.current_url
+        self.browser_handler.get(f"https://www.instagram.com/{user}")
+        try:
+            post_rows = get_elements(self.browser_handler, (By.CSS_SELECTOR, f'div[class="{POST_ROW}"]'))
+            counter = 0
+
+            for row in post_rows:
+                post_links = row.find_elements(By.TAG_NAME, 'a')
+                for link in post_links:
+                    if(counter >= limit):
+                        break
+                    link.click()
+
+                    like_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, 'svg[aria-label="Me gusta"]'))
+                    like_bt.click()
+
+                    self.wait('nano')
+                    close_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, 'svg[aria-label="Cerrar"]'))
+                    close_bt.click()
+                    counter+=1
+
+        except Exception as e:
+            warning(f'No se pudo darle like a un post de la cuenta: {user}')
+        finally:
+            self.browser_handler.get(prev_url)
+        #---------- En desarrollo ----------
+
+
     def _update_follow_list(self, follow_box):
         self.browser_handler.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight)", follow_box)
         self.wait('nano')
@@ -795,45 +846,33 @@ class IgBot(Browser):
         return followers_num
 
     def unfollow_users(self, users: list[str]):
+        """
+        Esta funcion deja de seguir una lista de usuarios (users: list[str])
+        """
         self.open_my_profile()
         self.open_following_list()
+
+        for user in users:
+            try:
+                search_user_input = get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
+                search_user_input.send_keys(user)
+                search_user_input.send_keys(Keys.ENTER)
+
+                self.wait('search')
+                unfollow_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]'))
+                unfollow_bt.click()
+                accept_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{ACCEPT_UNFOLLOW}"]'))
+                accept_bt.click()
+            except Exception as e:
+                warning(f'no se encontro a {user}')
+
         
-        try:
-            for user in users:
-                input_follow = get_element(self.browser_handler, (By.CSS_SELECTOR, f'input[class="{INPUT_FOLLOW}"]'))
-                input_follow.send_keys(user)
-                input_follow.send_keys(Keys.ENTER)
-
-                try:
-                    self.wait('nano')
-                    acc_box = self.browser_handler.find_element(By.CSS_SELECTOR, f'div[class="{AC_FOLLOWER_CLASSES}"]')
-                    unfollow_bt = acc_box.find_element(By.TAG_NAME, "button")
-                    unfollow_bt.click()
-                    self.wait('nano')
-
-                    accept_bt = self.browser_handler.find_element(By.CSS_SELECTOR, f'button[class="{AC_UNFOLLOW_ACCEPT_BT}"]')
-                    accept_bt.click()
-
-                    self._discard_searching()
-                    self.wait('nano')
-                except:
-                    #self.browser_handler.find_element(By.XPATH, f"//span[contains(text(),'{NOT_FOUND_MSG}')]")
-                    warning(f'No se encontro al usuario: {user} en la lista de seguidos')
-                    self._discard_searching()
-                    continue
-                        
-        except Exception as e:
-            warning(f'No se pueden dejar de seguir las cuentas: {e}')
-
-    def _discard_searching(self):
-        try:
-            discard_search_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'div[class="{DISCARD_SEARCH_BT}"]'))
-            discard_search_bt.click()
-        except:
-            warning('No se encontro el boton de descarte de busqueda')
 
     def upload_post(self, post_img_path: str, post_txt: str=''):
-        
+        """
+            Esta funcion sube una publicacion a la cuenta, post_img_path es la cadena donde va la ruta de la imagen a postear 
+            y post_txt la cadena donde va la descripcion del post.
+        """
         self.wait('micro')
         try:
             locator = (By.CSS_SELECTOR, 'svg[aria-label="Nueva publicación"]')
@@ -885,9 +924,19 @@ class IgBot(Browser):
             self.check_challenge()
             warning('No se ha encontrado el boton para subir posts.')
 
-    def check_challenge(self):
+    def check_challenge(self) -> bool:
+        """
+            Metodo que verifica si instagram esta solicitando resolver un "desafio" o captcha para comprobar que no eres un bot
+
+            Se recomienda que despues de una sospecha por parte de ig la cantidad de cuentas a seguir o dejar de seguir y la cantidad de likes 
+            disminuya a la mitad o mas, de otro modo se corre el riesgo de otras penalizaciones como ban.
+        """
         if 'challenge' in self.browser_handler.current_url:
+            warning("Posible deteccion del bot: Se requiere verificacion por recaptcha")
             self.show_window()
+            return True
+        
+        return False
 
     def _check_login(self, admsg:str=''):
         if not self.is_logged:
@@ -896,15 +945,17 @@ class IgBot(Browser):
     
 
 def main():
-    bot = IgBot()
+    bot = IgBot(headless=False)
     bot.username = 'darkm31'
+    #bot.pwd = 'password'
     
     bot.init_ig()
-    bot.accept_notifications(False)
-    users = ['jualopez3530', 'fernandolopezballera', 'yohanny_toyo', 'luis.quilarque.796', 'el_brian2024', 'mariodelacruz92', 'danivitri_01', 'kjhon.91', 
-'selelugo240', 'yahunathanalmerida', 'orfila9512', 'mirianyelabourgeonmarin', 'figuera8994', 'str.gz_blazzz', 'ballaluzrojas', 'ashli_bl', 'cases.pzo', 'zabadi_pzo', 'edinsonjosue5750', 'chrystopher.jimenez', 'henryvaldez899', 'daniellamoya.v', 'melanyale09', 'rebecanessii', 'daielantoniogittins', 'cristhianjaviersifontes', 'joseangel.gonzalezsoto', 'tsukibo_rgs', 'glorysmarpalma', 'silverwolfwa', 'josha.25', 'mariannys.moya', 'garcesdarielis', 'anthonypitter_29', 'francesco_carladi', 'do_rubmelys23']
-    bot.unfollow_users(users)
-    #bot.upload_post('C:/Users/Ines/Desktop/kk.png', 'Somethingsomethingsomething')
+    #bot.wait('micro')
+    #bot.show_window()
+    bot.accept_notifications(True)
+    #bot.unfollow_users(['lucasmeloryt'])
+    bot.like_posts('lucasmeloryt')
+    #bot.upload_post('Desktop/kk.png', 'Somethingsomethingsomething')
     #print(bot.my_followers_num())
     #print(bot.follow_by_hashtag('#programacionvenezuela'))
     #time.sleep(1000)
