@@ -520,6 +520,26 @@ class IgBot(Browser):
             self.save_cookies('instagram', self.username)
             self.wait('micro')
         
+    def register(self, email: str, name: str, username: str, pwd: str, birth: str):
+
+        try:
+            self._check_login()
+            warning('No se puede registrar una nueva cuenta porque hay una sesion activa.')
+            return
+        except:
+            pass
+
+        self.browser_handler.get(IG_REGISTRATION_URL)
+        try:
+            inputs = get_elements(self.browser_handler, (By.TAG_NAME, 'input'))
+
+            inputs[0].send_keys(email)
+            inputs[1].send_keys(name)
+            inputs[2].send_keys(username)
+            inputs[3].send_keys(pwd)
+            
+        except:
+            pass
 
     def login(self, sv_cookies: bool=False, accept_nt: bool=False):
         
@@ -557,7 +577,7 @@ class IgBot(Browser):
         self.accept_session_cookies(sv_cookies)
 
         #self.accept_notifications(False)
-    
+
     def search_for(self, searching:str):
         """
             Busca cuentas o hashtags por medio de la barra de busqueda de la pagina.
@@ -600,6 +620,7 @@ class IgBot(Browser):
         #Elimina las cookies de sesion que estan cargadas (si es que las hay)
         self.delete_cookies()
         self.is_logged = False
+        self.refresh()
 
 
     def close(self):
@@ -724,19 +745,22 @@ class IgBot(Browser):
             locator = (By.CSS_SELECTOR, f'div[class="{AC_FOLLOWER_CLASSES}"]')
 
             #bucle que actualiza la lista de seguidores hasta que la cantidad coincida con el limite especificado previamente
+            attempt = 0
+            prev_len = 0
             while True:
-                # self.browser_handler.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight)", followers_box)
-                # self.wait('nano')
-                # self.browser_handler.execute_script("window.scrollTo(0,0)")
-                # self.wait('nano')
-                # self.browser_handler.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-                # self.wait('micro')
+
                 self._update_follow_list(followers_box)
                 #followers_list = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(locator))
                 followers_list = get_elements(self.browser_handler, locator)
-                if len(followers_list) >= limit:
+                followers_len = len(followers_list)
+
+                if (followers_len >= limit) or (attempt > 4):
                     account_list = followers_list
                     break
+                elif followers_len == prev_len:
+                    attempt+=1
+                else:
+                    prev_len = followers_len
 
             account_users = []
             for account in account_list:
@@ -785,6 +809,7 @@ class IgBot(Browser):
             warning(f'No se pudo darle like a un post de la cuenta: {user}')
         finally:
             self.browser_handler.get(prev_url)
+            
         #---------- En desarrollo ----------
 
 
@@ -824,11 +849,6 @@ class IgBot(Browser):
         print('->'+ self.browser_handler.current_url)
         followers_num = None
         try:
-            #locator = (By.CSS_SELECTOR, f'span[class="{NUM_SPAN_CLASSES}"]:nth-child(2)')
-            #locator = (By.PARTIAL_LINK_TEXT, ' seguidores')
-            #followers_link = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
-            #num_span = followers_link.find_element(By.CSS_SELECTOR, 'span > span')
-            #num_span = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
 
             locator = (By.CSS_SELECTOR, f'ul[class="{AC_INFO_SECTION_CLASSES}"]')
 
@@ -879,11 +899,6 @@ class IgBot(Browser):
             #upload_post_bt = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
             upload_post_bt = get_element(self.browser_handler, locator)
             upload_post_bt.click()
-
-            #locator = (By.CSS_SELECTOR, f'button[class="{SELECT_IMG_BT}"]')
-            ##select_img_bt = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
-            #select_img_bt = get_element(self.browser_handler, locator)
-            #select_img_bt.click()
             
             locator = (By.CSS_SELECTOR, f'input[class="{SECRET_IGM_INPUT_CLASS}"]')
             img_input = get_element(self.browser_handler, locator)
