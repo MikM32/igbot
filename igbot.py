@@ -411,15 +411,6 @@ class IgBot(Browser):
         self._init_paths()
         self._init_db('instagram')
 
-
-    #Solo ignoren este metodo XD
-    #def _exist_usercookie(self, username: str) -> bool:
-    #    flg = False
-    #    for arch in os.listdir(COOKIES_PATH):
-    #        if username in arch:
-    #            flg = True
-    #            break
-    #    return flg
     def _init_paths(self):
         if(not os.path.exists(COOKIES_PATH)):
             os.mkdir(COOKIES_PATH)
@@ -431,8 +422,6 @@ class IgBot(Browser):
     def _init_vpn(self):
         self.vpn = UrbanVpn(self.browser_handler)
         self.vpn.init_page()
-
-        
 
         self.vpn.accept_terms()
         self.vpn.activate()
@@ -496,6 +485,7 @@ class IgBot(Browser):
             #self.save_cookies('instagram', self.username)
         except Exception:
             warning("No se encuentra la ventana de notificaciones.")
+            self.check_challenge()
 
     def accept_session_cookies(self, save: bool):
         """
@@ -516,6 +506,7 @@ class IgBot(Browser):
                 no_accept_button.click()
         except Exception:
             warning("No se encuentra la ventana de permanencia.")
+            self.check_challenge()
         finally:
             self.save_cookies('instagram', self.username)
             self.wait('micro')
@@ -539,7 +530,7 @@ class IgBot(Browser):
             inputs[3].send_keys(pwd)
             
         except:
-            pass
+            self.check_challenge()
 
     def login(self, sv_cookies: bool=False, accept_nt: bool=False):
         
@@ -550,9 +541,9 @@ class IgBot(Browser):
             return
         
         if not self.username:
-            raise LoginNoUserException
+            raise LoginNoUserException()
         elif not self.pwd:
-            raise LoginNoPasswordException
+            raise LoginNoPasswordException()
 
         username_input = self.browser_handler.find_element(By.XPATH, USER_INPUT_XPATH)
         pwd_input = self.browser_handler.find_element(By.XPATH, PWD_INPUT_XPATH)
@@ -565,7 +556,7 @@ class IgBot(Browser):
         except NoSuchElementException:
             raise InvalidInputData()
             
-        self.wait()
+        self.wait('micro')
 
         try:
             login_msg = self.browser_handler.find_element(By.XPATH, LOGIN_ERROR_MSG_XPATH)
@@ -590,6 +581,7 @@ class IgBot(Browser):
 
         except NoSuchElementException as e:
             warning(f'search_for(): no se encontro el boton de busqueda.:{e}')
+            self.check_challenge()
         
         try:
             self.wait()
@@ -599,6 +591,7 @@ class IgBot(Browser):
             
         except NoSuchElementException as e:
             warning(f'search_for(): no se ha encontrado el input de busqueda.{e}')
+            self.check_challenge()
         
         try:
             self.wait()
@@ -608,6 +601,7 @@ class IgBot(Browser):
             result_link.click()
         except Exception as e:
             warning(repr(e))
+            self.check_challenge()
         
         
     def logout(self):
@@ -644,6 +638,7 @@ class IgBot(Browser):
             followers_link.click()
         except TimeoutError:
             warning('open_followers_list(): no se encontro el link para ver la lista de seguidores')
+            self.check_challenge()
     
     def open_following_list(self):
         self._check_login()       
@@ -658,6 +653,7 @@ class IgBot(Browser):
             followers_link.click()
         except TimeoutException:
             warning('open_following_list(): no se encontro el link para ver la lista de seguidos')
+            self.check_challenge()
     
     def follow_by_hashtag(self, hashtag: str, like_posts: bool, limit: int=30) -> list[str]:
         """
@@ -719,6 +715,7 @@ class IgBot(Browser):
             post_link.click()
         except Exception as e:
             warning(f'follow_by_hashtag(): no se encuentran las filas de la matriz de posts.: {e}')
+            self.check_challenge()
 
 
         try:
@@ -729,6 +726,7 @@ class IgBot(Browser):
 
         except NoSuchElementException as e:
             warning(f"follow_by_hashtag(): no se encuentra el link de la cuenta propietaria del post.:{e}")
+            self.check_challenge()
         
         try:
             self.wait('micro')
@@ -777,6 +775,7 @@ class IgBot(Browser):
 
         except NoSuchElementException as e:
             warning(f"follow_by_hashtag(): no se encuentra el link para ver seguidores de la cuenta.:{e}")
+            self.check_challenge()
 
         return account_users
     
@@ -804,11 +803,10 @@ class IgBot(Browser):
                     close_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, 'svg[aria-label="Cerrar"]'))
                     close_bt.click()
                     counter+=1
-
+            self.browser_handler.get(prev_url)
         except Exception as e:
             warning(f'No se pudo darle like a un post de la cuenta: {user}')
-        finally:
-            self.browser_handler.get(prev_url)
+            self.check_challenge()
             
         #---------- En desarrollo ----------
 
@@ -826,7 +824,7 @@ class IgBot(Browser):
             abre la pagina del perfil de la cuenta que esta usando el bot
         """
         self._check_login()
-        print('->'+ self.browser_handler.current_url)
+        #print('->'+ self.browser_handler.current_url)
         
         self.wait('nano')
         try:
@@ -836,8 +834,9 @@ class IgBot(Browser):
             my_profile_link.click()
         except TimeoutException:
             warning('No se encontro el link para ver el perfil de la cuenta.')
+            self.check_challenge()
             
-        print('->'+ self.browser_handler.current_url)
+        #print('->'+ self.browser_handler.current_url)
 
 
     def my_followers_num(self) -> int:
@@ -862,6 +861,7 @@ class IgBot(Browser):
 
         except TimeoutException:
             warning('No se encontro el numero de seguidores de la cuenta.')
+            self.check_challenge()
         
         return followers_num
 
@@ -885,6 +885,7 @@ class IgBot(Browser):
                 accept_bt.click()
             except Exception as e:
                 warning(f'no se encontro a {user}')
+                self.check_challenge()
 
         
 
@@ -926,6 +927,7 @@ class IgBot(Browser):
                 print('Post subido exitosamente!.')
             except TimeoutException:
                 warning('Tiempo de espera para subir el post excedido')
+                self.check_challenge()
             
             locator = (By.CSS_SELECTOR, 'svg[aria-label="Cerrar"]')
             close_bt = get_element(self.browser_handler, locator)
@@ -936,8 +938,34 @@ class IgBot(Browser):
             #    place_input = get_element(self.browser_handler, locator)
             #    place_input.send_keys(post_place)
         except TimeoutException:
-            self.check_challenge()
             warning('No se ha encontrado el boton para subir posts.')
+            self.check_challenge()
+
+    def comment_post(self, post_url: str, comment_txt: str):
+        """
+            Metodo que hace comentario en un post dado por su url
+        """
+        
+        prev_url = self.browser_handler.current_url
+        self.browser_handler.get(post_url)
+        try:
+            locator = (By.CSS_SELECTOR, "textarea:nth-child(1)")
+            comment_input = get_element(self.browser_handler, locator)
+
+            self.wait('nano')
+            comment_input.send_keys(comment_txt)
+        except TimeoutException:
+            warning(f'No se pudo comentar en el post: {post_url}')
+            self.check_challenge()
+
+        self.browser_handler.get(prev_url)
+    
+    def comment_post_list(self, post_url_list: list[str], comment_txt: str):
+        """
+            Metodo que hace un comentario a una lista de posts dados por su url
+        """
+        for post_url in post_url_list:
+            self.comment_post(post_url, comment_txt)
 
     def check_challenge(self) -> bool:
         """
