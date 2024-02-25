@@ -2,6 +2,7 @@
 #directorios y urls
 WEBDRIVER_ROOT_PATH = 'webdrivers/'
 COOKIES_PATH = WEBDRIVER_ROOT_PATH+'galletas/'
+PATCH_INFO_PATH = WEBDRIVER_ROOT_PATH + 'patchinfo.dat'
 COOKIES_DB = COOKIES_PATH+'galletas.db'
 CHROME_USER_DATA = WEBDRIVER_ROOT_PATH+'chromedata/User data'
 PROFILE_PATH = f'{CHROME_USER_DATA}/Default'
@@ -105,4 +106,6 @@ INPUT_FOLLOW = 'x1lugfcp x19g9edo x1lq5wgf xgqcy7u x30kzoy x9jhf4c x972fbf xcfux
 DISCARD_SEARCH_BT = '_aawn _9-lv'
 REG_ICO_OK = 'xo3uz88 x1twbzvy xiy17q3 x17rw0jw x17z2i9w xk334sl x16jvkkw x9p3b3b x972fbf xcfux6l x1qhh985 xm0m39n xjb2p0i xk390pu xdj266r x11i5rnm xat24cr x1i64zmx xexx8yu x4uap5 x18d9i69 xkhd6sd x11njtxf'
 REG_ICO_BAD = 'xo3uz88 x1nxxyus xiy17q3 x17rw0jw x17z2i9w xk334sl x1fkhu6j x9p3b3b x972fbf xcfux6l x1qhh985 xm0m39n xjb2p0i xk390pu xdj266r x11i5rnm xat24cr x1i64zmx xexx8yu x4uap5 x18d9i69 xkhd6sd x11njtxf'
+OFF_COMMENT_TEXT = 'x1i0vuye xvbhtw8 x1ejq31n xd10rxx x1sy0etr x17r0tee x5n08af x78zum5 x1iyjqo2 x1qlqyl8 x1d6elog xlk1fp6 x1a2a7pz xexx8yu x4uap5 x18d9i69 xkhd6sd xtt52l0 xnalus7 xs3hnx8 x1bq4at4 xaqnwrm'
+ON_COMMENT_TEXT = 'x1i0vuye xvbhtw8 x1ejq31n xd10rxx x1sy0etr x17r0tee x5n08af x78zum5 x1iyjqo2 x1qlqyl8 x1d6elog xlk1fp6 x1a2a7pz xexx8yu x4uap5 x18d9i69 xkhd6sd xtt52l0 xnalus7 xs3hnx8 x1bq4at4 xaqnwrm focus-visible'
 SEND_COMMENT_BT = '_aidp'

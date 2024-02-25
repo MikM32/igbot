@@ -8,10 +8,10 @@
     Notas del autor:
         -durante todas las pruebas, instagram no ha detectado actividad sospechosa. Pero esto no quiere decir que no pueda detectarla.
         -El uso prolongado del bot puede levantar sospechas por parte de instagram, cosa que no me ha pasado hasta ahora por suerte.
+        -Opte por ocultar la ventana del navegador con la api de windows como alternativa al modo headless de chrome que es muy peligroso.
 """
 
 import time
-#import random
 import os, sys
 import secrets
 
@@ -31,6 +31,7 @@ from webdriver_manager.core.driver_cache import DriverCacheManager
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import StaleElementReferenceException
 
 from win32gui import GetWindowText
 from win32gui import EnumWindows
@@ -133,7 +134,35 @@ class Browser:
         self.sleep_secs = None
     
     def _patch_chromedriver(self):
-        pass
+        """
+            Reemplaza la JSfingerprint del webdriver para evitar detecciones
+        """
+        
+        data = None
+        old_fingerprint = None
+
+        if(os.path.exists(PATCH_INFO_PATH)):
+            with open(PATCH_INFO_PATH, 'r') as fso:
+                old_fingerprint = fso.read()
+        else:
+            old_fingerprint = 'cdc_'
+
+
+        with open(self.webdriver_path, 'rb') as fso:
+            data = fso.read()
+
+        new_fingerprint = secrets.choice(['lll', 'AaA', 'oAo', 'kol', 'Akr', 'PlP', 'mel', 'yes', 'nop', 'ghi', 'cgi'])
+        new_fingerprint+= '_'
+        
+        data = data.replace(bytes(old_fingerprint, 'ansi'), bytes(new_fingerprint, 'ansi'))
+
+        with open(self.webdriver_path, 'wb') as fso:
+            fso.write(data)
+        del data
+        
+        with open(PATCH_INFO_PATH, 'w') as fso:
+            fso.write(new_fingerprint)
+
 
     def _init_chrome(self):
         self.options = COptions()
@@ -141,7 +170,7 @@ class Browser:
         #self.options.add_argument(f"--user-data-dir={CHROME_USER_DATA}")
         #if self.is_headless:
             #ejecuta el programa sin la ventana del navegador
-        #    self.options.add_argument('--headless=new')
+        ###    self.options.add_argument('--headless=new') #No te recomendaria decomentar esta seccion XD
         #    self.options.add_experimental_option('prefs', {'intl.accept_languages': 'es,es_ES'})
         if self.use_vpn:
             full_path = os.path.join(os.getcwd(), URBAN_VPN_EXT_PATH)
@@ -157,6 +186,8 @@ class Browser:
 
         self.options.binary_location = self.def_browser
         self.service = None
+
+        #Descarga los chromedrivers necesarios si no se detectan en WEBDRIVER_ROOT_PATH
         if(not os.path.exists(self.webdriver_path)):
             cache_manager=DriverCacheManager(WEBDRIVER_ROOT_PATH)
             current_version = default_browser.get_chrome_version()
@@ -957,19 +988,26 @@ class IgBot(Browser):
             Metodo que hace comentario en un post dado por su url
         """
         
-        prev_url = self.browser_handler.current_url
+        #prev_url = self.browser_handler.current_url
         self.browser_handler.get(post_url)
+        self.wait('nano')
         try:
-            locator = (By.CSS_SELECTOR, "textarea:nth-child(1)")
+            #Presiona el cuadro de texto para activarlo
+            locator = (By.CSS_SELECTOR, f'textarea[class="{OFF_COMMENT_TEXT}"]')
             comment_input = get_element(self.browser_handler, locator)
+            comment_input.click()
 
-            self.wait('nano')
+            #Una vez activado se escribe el comentario
+            locator = (By.CSS_SELECTOR, f'textarea[class="{ON_COMMENT_TEXT}"]')
+            comment_input = get_element(self.browser_handler, locator)
             comment_input.send_keys(comment_txt)
 
+            #Y luego se presiona el boton de publicar
             locator = (By.CSS_SELECTOR, f"div[class={SEND_COMMENT_BT}]")
             comment_bt = get_element(self.browser_handler, locator)
             comment_bt.click()
-
+        except StaleElementReferenceException:
+            warning('No se activo el cuadro de texto y por lo tanto no se puede escribir el comentario')
         except TimeoutException:
             warning(f'No se pudo comentar en el post: {post_url}')
             self.check_challenge()
