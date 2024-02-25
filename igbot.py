@@ -12,7 +12,7 @@
 
 import time
 #import random
-import os
+import os, sys
 import secrets
 
 from selenium import webdriver
@@ -25,6 +25,9 @@ from selenium.webdriver.firefox.service import Service as FService
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.driver_cache import DriverCacheManager
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
@@ -47,9 +50,11 @@ def get_webdriver_path(browser_type: str) -> str:
     webdriver_path= WEBDRIVER_ROOT_PATH
 
     if "Chrome" in browser_type:
-        webdriver_path+= "chromedriver.exe"
-    elif "Firefox" in browser_type:
-        webdriver_path+= "geckodriver.exe"
+        version = default_browser.get_chrome_version()
+        cur_os = sys.platform
+        webdriver_path+= f".wdm/drivers/chromedriver/{cur_os}/{version}/chromedriver-{cur_os}/chromedriver.exe"
+    #elif "Firefox" in browser_type:
+    #    webdriver_path+= "geckodriver.exe"
     else:
         raise UncompatibleDefaultBrowser(browser_type)
     
@@ -127,7 +132,9 @@ class Browser:
         self.service = None
         self.sleep_secs = None
     
-        
+    def _patch_chromedriver(self):
+        pass
+
     def _init_chrome(self):
         self.options = COptions()
         #full_userdata_path = os.path.join(os.getcwd(), CHROME_USER_DATA)
@@ -149,7 +156,13 @@ class Browser:
         self.options.add_experimental_option('detach', True)
 
         self.options.binary_location = self.def_browser
-        self.service = CService(executable_path=self.webdriver_path)
+        self.service = None
+        if(not os.path.exists(self.webdriver_path)):
+            cache_manager=DriverCacheManager(WEBDRIVER_ROOT_PATH)
+            current_version = default_browser.get_chrome_version()
+            self.service = CService(ChromeDriverManager(driver_version=current_version, cache_manager=cache_manager).install())
+        else:
+            self.service = CService(executable_path=self.webdriver_path)
         self.browser_handler = webdriver.Chrome(options=self.options, service=self.service)
 
     def _init_firefox(self):
@@ -187,16 +200,14 @@ class Browser:
             self._init_chrome()
 
         #!!IMPORTANTE!!: Firefox perdera soporte por falta de metodos para evadir la deteccion de bots.
-        elif "Firefox" in self.def_browser:
-            self._init_firefox()
+        #elif "Firefox" in self.def_browser:
+        #    self._init_firefox()
         else:
             raise UncompatibleDefaultBrowser(self.def_browser)
         
 
     def save_cookies(self, webname: str, username: str):
 
-        #Por el momento almaceno las cookies en archivos JSON
-        #Mas tarde implementare el guardado de cookies en una base de datos sqlite
         cookies = self.browser_handler.get_cookies()
 
         #with open(COOKIES_PATH+pre+'_cookies.json', 'w+') as file_cookie:
@@ -954,11 +965,16 @@ class IgBot(Browser):
 
             self.wait('nano')
             comment_input.send_keys(comment_txt)
+
+            locator = (By.CSS_SELECTOR, f"div[class={SEND_COMMENT_BT}]")
+            comment_bt = get_element(self.browser_handler, locator)
+            comment_bt.click()
+
         except TimeoutException:
             warning(f'No se pudo comentar en el post: {post_url}')
             self.check_challenge()
 
-        self.browser_handler.get(prev_url)
+        #self.browser_handler.get(prev_url)
     
     def comment_post_list(self, post_url_list: list[str], comment_txt: str):
         """
@@ -995,9 +1011,10 @@ def main():
     bot.init_ig()
     #bot.wait('micro')
     #bot.show_window()
-    bot.accept_notifications(True)
+    bot.accept_notifications(False)
+    bot.comment_post('https://www.instagram.com/p/C3tRu41pVEE/', '.')
     #bot.unfollow_users(['lucasmeloryt'])
-    bot.like_posts('lucasmeloryt')
+    #bot.like_posts('lucasmeloryt')
     #bot.upload_post('Desktop/kk.png', 'Somethingsomethingsomething')
     #print(bot.my_followers_num())
     #print(bot.follow_by_hashtag('#programacionvenezuela'))

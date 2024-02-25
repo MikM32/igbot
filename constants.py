@@ -105,3 +105,4 @@ INPUT_FOLLOW = 'x1lugfcp x19g9edo x1lq5wgf xgqcy7u x30kzoy x9jhf4c x972fbf xcfux
 DISCARD_SEARCH_BT = '_aawn _9-lv'
 REG_ICO_OK = 'xo3uz88 x1twbzvy xiy17q3 x17rw0jw x17z2i9w xk334sl x16jvkkw x9p3b3b x972fbf xcfux6l x1qhh985 xm0m39n xjb2p0i xk390pu xdj266r x11i5rnm xat24cr x1i64zmx xexx8yu x4uap5 x18d9i69 xkhd6sd x11njtxf'
 REG_ICO_BAD = 'xo3uz88 x1nxxyus xiy17q3 x17rw0jw x17z2i9w xk334sl x1fkhu6j x9p3b3b x972fbf xcfux6l x1qhh985 xm0m39n xjb2p0i xk390pu xdj266r x11i5rnm xat24cr x1i64zmx xexx8yu x4uap5 x18d9i69 xkhd6sd x11njtxf'
+SEND_COMMENT_BT = '_aidp'
