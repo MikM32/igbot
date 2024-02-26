@@ -545,7 +545,11 @@ class IgBot(Browser):
             #self.save_cookies('instagram', self.username)
         except Exception:
             warning("No se encuentra la ventana de notificaciones.")
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.accept_notifications(accept)
 
     def accept_session_cookies(self, save: bool):
         """
@@ -566,7 +570,11 @@ class IgBot(Browser):
                 no_accept_button.click()
         except Exception:
             warning("No se encuentra la ventana de permanencia.")
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.accept_session_cookies(save)
         finally:
             self.save_cookies('instagram', self.username)
             self.wait('micro')
@@ -643,7 +651,11 @@ class IgBot(Browser):
 
         except:
             warning('No se puede registrar una nueva cuenta porque no se encontraron algunos elementos')
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.register(email, name, username, pwd, birth)
 
     def login(self, sv_cookies: bool=False, accept_nt: bool=False):
         
@@ -694,7 +706,11 @@ class IgBot(Browser):
 
         except NoSuchElementException as e:
             warning(f'search_for(): no se encontro el boton de busqueda.:{e}')
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.search_for(searching)
         
         try:
             self.wait()
@@ -704,7 +720,11 @@ class IgBot(Browser):
             
         except NoSuchElementException as e:
             warning(f'search_for(): no se ha encontrado el input de busqueda.{e}')
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.search_for(searching)
         
         try:
             self.wait()
@@ -714,7 +734,11 @@ class IgBot(Browser):
             result_link.click()
         except Exception as e:
             warning(repr(e))
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.search_for(searching)
         
         
     def logout(self):
@@ -751,7 +775,11 @@ class IgBot(Browser):
             followers_link.click()
         except TimeoutError:
             warning('open_followers_list(): no se encontro el link para ver la lista de seguidores')
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.open_followers_list()
     
     def open_following_list(self):
         self._check_login()       
@@ -766,7 +794,11 @@ class IgBot(Browser):
             followers_link.click()
         except TimeoutException:
             warning('open_following_list(): no se encontro el link para ver la lista de seguidos')
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.open_following_list()
     
     def follow_by_hashtag(self, hashtag: str, like_posts: bool, limit: int=30) -> list[str]:
         """
@@ -811,6 +843,7 @@ class IgBot(Browser):
         print('->'+ self.browser_handler.current_url)
 
         account_list = []
+        account_users = []
 
         try:
             
@@ -828,7 +861,11 @@ class IgBot(Browser):
             post_link.click()
         except Exception as e:
             warning(f'follow_by_hashtag(): no se encuentran las filas de la matriz de posts.: {e}')
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                account_users = self.follow_by_hashtag(hashtag, like_posts, limit)
 
 
         try:
@@ -839,7 +876,11 @@ class IgBot(Browser):
 
         except NoSuchElementException as e:
             warning(f"follow_by_hashtag(): no se encuentra el link de la cuenta propietaria del post.:{e}")
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                account_users = self.follow_by_hashtag(hashtag, like_posts, limit)
         
         try:
             self.wait('micro')
@@ -873,7 +914,7 @@ class IgBot(Browser):
                 else:
                     prev_len = followers_len
 
-            account_users = []
+            
             for account in account_list:
                 ac_span = account.find_element(By.CSS_SELECTOR, f'span[class="{AC_FOLLOWER_NAME_CLASSES}"]')
                 ac_follow_bt = account.find_element(By.CSS_SELECTOR, f'button[class="{AC_FOLLOWER_FOLLOW_BT_CLASSES}"]')
@@ -888,7 +929,11 @@ class IgBot(Browser):
 
         except NoSuchElementException as e:
             warning(f"follow_by_hashtag(): no se encuentra el link para ver seguidores de la cuenta.:{e}")
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                account_users = self.follow_by_hashtag(hashtag, like_posts, limit)
 
         return account_users
     
@@ -919,7 +964,11 @@ class IgBot(Browser):
             self.browser_handler.get(prev_url)
         except Exception as e:
             warning(f'No se pudo darle like a un post de la cuenta: {user}')
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.like_posts(user, limit)
             
         #---------- En desarrollo ----------
 
@@ -947,7 +996,11 @@ class IgBot(Browser):
             my_profile_link.click()
         except TimeoutException:
             warning('No se encontro el link para ver el perfil de la cuenta.')
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.open_my_profile()
             
         #print('->'+ self.browser_handler.current_url)
 
@@ -974,7 +1027,11 @@ class IgBot(Browser):
 
         except TimeoutException:
             warning('No se encontro el numero de seguidores de la cuenta.')
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                followers_num = self.my_followers_num()
         
         return followers_num
 
@@ -998,7 +1055,11 @@ class IgBot(Browser):
                 accept_bt.click()
             except Exception as e:
                 warning(f'no se encontro a {user}')
-                self.check_challenge()
+                if self.check_challenge():
+                    while 'challenge' in self.browser_handler.current_url:
+                        warning('Se debe resolver el captcha para poder continuar.')
+                        self.wait()
+                    self.unfollow_users(users)
 
         
 
@@ -1052,7 +1113,11 @@ class IgBot(Browser):
             #    place_input.send_keys(post_place)
         except TimeoutException:
             warning('No se ha encontrado el boton para subir posts.')
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.upload_post(post_img_path, post_txt)
 
     def comment_post(self, post_url: str, comment_txt: str):
         """
@@ -1081,7 +1146,11 @@ class IgBot(Browser):
             warning('No se activo el cuadro de texto y por lo tanto no se puede escribir el comentario')
         except TimeoutException:
             warning(f'No se pudo comentar en el post: {post_url}')
-            self.check_challenge()
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+                self.comment_post(post_url, comment_txt)
 
         #self.browser_handler.get(prev_url)
     
@@ -1092,7 +1161,7 @@ class IgBot(Browser):
         for post_url in post_url_list:
             self.comment_post(post_url, comment_txt)
 
-    def check_challenge(self) -> bool:
+    def check_challenge(self) -> bool: 
         """
             Metodo que verifica si instagram esta solicitando resolver un "desafio" o captcha para comprobar que no eres un bot
 
@@ -1114,11 +1183,11 @@ class IgBot(Browser):
 
 def main():
     bot = IgBot(headless=False)
-    bot.username = 'darkm31'
+    bot.set_username('darkm31')
     #bot.pwd = 'password'
     
     #bot.init_ig()
-    bot.register('andresbellowazaa@gmail.com', 'Tolonso', 'tolotet22', 'asd', '23/2/1997')
+    #bot.register('andresbellowazaa@gmail.com', 'Tolonso', 'tolotet22', 'asd', '23/2/1997')
     #bot.wait('micro')
     #bot.show_window()
     #bot.accept_notifications(False)
