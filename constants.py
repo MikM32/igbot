@@ -20,6 +20,10 @@ WAIT_MAX = 60
 
 #mensajes
 LOGIN_INCORRECT_PWD_MSG = 'Tu contraseña no es correcta'
+REG_INVALID_MAIL = 'Enter a valid email address.'
+REG_INVALID_PWD = 'Crea una contraseña que tenga al menos 6 caracteres.'
+REG_INVALID_USERNAME = 'Los nombres de usuario solo pueden contener letras, números, guiones bajos y puntos.'
+REG_USERNAME_IN_USE = 'Este nombre de usuario no está disponible. Prueba otro.'
 
 #xpaths para la pagina de inicio de sesion
 USER_INPUT_XPATH = '//*[@id="loginForm"]/div/div[1]/div/label/input'
@@ -109,3 +113,8 @@ REG_ICO_BAD = 'xo3uz88 x1nxxyus xiy17q3 x17rw0jw x17z2i9w xk334sl x1fkhu6j x9p3b
 OFF_COMMENT_TEXT = 'x1i0vuye xvbhtw8 x1ejq31n xd10rxx x1sy0etr x17r0tee x5n08af x78zum5 x1iyjqo2 x1qlqyl8 x1d6elog xlk1fp6 x1a2a7pz xexx8yu x4uap5 x18d9i69 xkhd6sd xtt52l0 xnalus7 xs3hnx8 x1bq4at4 xaqnwrm'
 ON_COMMENT_TEXT = 'x1i0vuye xvbhtw8 x1ejq31n xd10rxx x1sy0etr x17r0tee x5n08af x78zum5 x1iyjqo2 x1qlqyl8 x1d6elog xlk1fp6 x1a2a7pz xexx8yu x4uap5 x18d9i69 xkhd6sd xtt52l0 xnalus7 xs3hnx8 x1bq4at4 xaqnwrm focus-visible'
 SEND_COMMENT_BT = '_aidp'
+REG_ERROR_ALERT_ID = 'ssfErrorAlert'
+DATE_SELECTORS = '_aau- _ap32'
+REG_NEXT_BT = ' _acan _acap _acaq _acas _aj1- _ap30'
+VER_CODE_INPUT = '_aaie _aaic _ag7n'
+VER_CODE_ACTIVE_INPUT = '_aaie _aaif _aaic _ag7n'

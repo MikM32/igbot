@@ -90,7 +90,7 @@ class Browser:
     """
         Clase Browser:
 
-        -- propiedades:
+        -- atributos:
             -browser_handler: handler del navegador
 
             -def_browser: cadena que contiene el directorio donde se encuentra el ejecutable del navegador predeterminado
@@ -115,7 +115,11 @@ class Browser:
 
             -close_browser_handler()
     """
-    def __init__(self, browser_path: str='', use_vpn: bool = False, headless: bool = False):
+    def __init__(self, browser_path: str='',
+                 custom_b_handler: webdriver.Chrome = None,
+                 use_vpn: bool = False,
+                 headless: bool = False):
+        
         self.webdriver_path = None
         self.def_browser = None
         self.is_headless = headless
@@ -128,7 +132,7 @@ class Browser:
             self.def_browser = browser_path
         self.webdriver_path = get_webdriver_path(self.def_browser)
 
-        self.browser_handler = None
+        self.browser_handler = custom_b_handler
         self.options = None
         self.service = None
         self.sleep_secs = None
@@ -189,18 +193,19 @@ class Browser:
 
         #Descarga los chromedrivers necesarios si no se detectan en WEBDRIVER_ROOT_PATH
         if(not os.path.exists(self.webdriver_path)):
-            cache_manager=DriverCacheManager(WEBDRIVER_ROOT_PATH)
+            cache_manager = DriverCacheManager(WEBDRIVER_ROOT_PATH) #Especifica la ruta de descarga e instalacion del webdriver
             current_version = default_browser.get_chrome_version()
             self.service = CService(ChromeDriverManager(driver_version=current_version, cache_manager=cache_manager).install())
         else:
             self.service = CService(executable_path=self.webdriver_path)
         self.browser_handler = webdriver.Chrome(options=self.options, service=self.service)
 
-    def _init_firefox(self):
-        self.options = FOptions()
-        self.options.binary = self.def_browser
-        self.service = FService(executable_path=self.webdriver_path)
-        self.browser_handler = webdriver.Firefox(options=self.options, service=self.service)
+    #Comentado porque firefox perdio soporte
+    #def _init_firefox(self):
+    #    self.options = FOptions()
+    #    self.options.binary = self.def_browser
+    #    self.service = FService(executable_path=self.webdriver_path)
+    #    self.browser_handler = webdriver.Firefox(options=self.options, service=self.service)
 
     def hide_window(self, inital_page: bool=False):
         if not self.__is_hide:
@@ -227,6 +232,8 @@ class Browser:
         """"
             Inicializa el webdriver
         """
+        if self.browser_handler is not None:
+            return
         if "Chrome" in self.def_browser:
             self._init_chrome()
 
@@ -238,6 +245,13 @@ class Browser:
         
 
     def save_cookies(self, webname: str, username: str):
+        """
+            metodo que guarda las cookies de sesion del usuario actual en la base de datos. 
+            El formato de los nombres en el campo Usuarios de la base de datos es: NOMBRE_DE_WEB+_+USERNAME.
+
+             Por ejemplo: para un usuario de instagram seria webname = 'instagram', username= 'fulano123.' 
+             y por lo tanto se guardaria en la base de datos como instagram_fulano123. 
+        """
 
         cookies = self.browser_handler.get_cookies()
 
@@ -252,9 +266,9 @@ class Browser:
     def load_cookies(self, webname: str, username: str):
         """
             Carga las cookies de sesion de una red social determinada
-            por el parametro 'pre', el cual es una cadena que contiene
-            el prefijo de la red social. Ejem: ig (Instagram), fb (Facebook),
-            ttk (TikTok), etc...
+            por el parametro webname y el nombre de usuario, el cual es una cadena que contiene
+            el prefijo de la red social. Ejem: instagram, facebook,
+            tiktok, etc...
         """
         try:
             #with open(COOKIES_PATH+pre+'_cookies.json', 'r') as file_cookie:
@@ -265,9 +279,7 @@ class Browser:
             self.browser_handler.execute_cdp_cmd('Network.enable',{})
 
             for cookie in cookies:
-                #cookie['domain'] = cookie['domain'].replace(self.old_url, self.url)
                 self.browser_handler.execute_cdp_cmd('Network.setCookie', cookie)
-            #    self.browser_handler.add_cookie(cookie)
             self.refresh()
 
             self.browser_handler.execute_cdp_cmd('Network.disable', {})
@@ -283,7 +295,7 @@ class Browser:
         """
             Metodo que hace esperar al navegador unos segundos
             (Dificulta la deteccion del bot)
-            type: parametro que representa la forma en la que se refrescan los segundos de espera (tiempo de espera normal, pequeño, micro o nano)
+            type: parametro que representa la forma en la que se refrescan los segundos de espera (tiempo de espera normal, small, micro, nano y search)
         """
         int_interval = 2
         int_offset = 0
@@ -428,7 +440,7 @@ class IgBot(Browser):
                 * __init__(*args):
                     args contiene un parametro opcional que seria la ruta del webdriver especificada por el usuario
                 
-                * init_ig_main():
+                * init_ig():
                     carga la pagina principal de instagram
                 
                 * login(user: str, pwd: str):
@@ -438,6 +450,7 @@ class IgBot(Browser):
                  username: str='',
                  pwd: str='',
                  browser_path: str ='',
+                 custom_b_handler: webdriver.Chrome = None,
                  use_vpn: bool = False,
                  headless:bool = False):
         
@@ -448,7 +461,6 @@ class IgBot(Browser):
         self.__is_in_page = False
 
         super().__init__(browser_path, use_vpn, headless)
-        self.init_browser_handler()
 
         self._init_paths()
         self._init_db('instagram')
@@ -469,11 +481,17 @@ class IgBot(Browser):
         self.vpn.activate()
         self.wait('micro')
 
+    def set_username(self, usr: str):
+        self.username = usr
+
+    def set_pwd(self, pwd: str):
+        self.pwd = pwd
+
     def init_ig(self, preload_cookies:bool = True):
         """
-            Metodo que inicializa el vpn, carga las cookies de sesion e inicia la pagina principal de instagram
+            Metodo que inicializa el browser_handler(webdriver), vpn, carga las cookies de sesion e inicia la pagina principal de instagram
         """
-
+        self.init_browser_handler()
         if self.is_headless:
             self.hide_window(inital_page=True)
         if self.use_vpn:
@@ -562,16 +580,69 @@ class IgBot(Browser):
         except:
             pass
 
+        birth_date = birth.split('/')
+        if(len(birth_date) < 3):
+            raise RegisterInvalidBirthdate()
+    
         self.browser_handler.get(IG_REGISTRATION_URL)
         try:
             inputs = get_elements(self.browser_handler, (By.TAG_NAME, 'input'))
 
             inputs[0].send_keys(email)
+            #comprobar validez
             inputs[1].send_keys(name)
+            #comprobar validez
             inputs[2].send_keys(username)
+            #comprobar validez
             inputs[3].send_keys(pwd)
+            #comprobar validez
+
+            inputs[3].send_keys(Keys.ENTER)
+
+            try:
+                error_alert = self.browser_handler.find_element(By.CSS_SELECTOR, f'p[id="{REG_ERROR_ALERT_ID}"]')
+                if REG_USERNAME_IN_USE in error_alert.text:
+                    raise RegisterUsernameInUse(error_alert.text)
+                elif REG_INVALID_MAIL in error_alert.text:
+                    raise RegisterInvalidEmail(error_alert.text)
+                elif REG_INVALID_PWD in error_alert.text:
+                    raise RegisterPasswordBelowSix(error_alert.text)
+                elif REG_INVALID_USERNAME in error_alert.text:
+                    raise RegisterInvalidUsername(error_alert.text)
+            except:
+                pass
+        
+
+            locator = (By.CSS_SELECTOR, f'select[class="{DATE_SELECTORS}"]')
+            selectors = get_elements(self.browser_handler, locator)
+
+            for i in range(3):
+                selectors[i].click()
+
+                locator = (By.CSS_SELECTOR, f'option[value="{birth_date[i]}"]')
+                cur_opt = get_element(self.browser_handler, locator)
+
+                self.browser_handler.execute_script('arguments[0].scrollIntoView();', cur_opt)
+                cur_opt.click()
             
+
+            
+            locator = (By.CSS_SELECTOR, f'button[class="{REG_NEXT_BT}"]')
+            next_bt = get_element(self.browser_handler, locator)
+
+            next_bt.click()
+
+            locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_INPUT}"]')
+            code_input = get_element(self.browser_handler, locator)
+            code_input.click()
+
+            locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_ACTIVE_INPUT}"]')
+            code_input = get_element(self.browser_handler, locator)
+            
+            #Aqui deberia llamar algun metodo que revise el correo en busqueda de correo de verificacion y que lo retorne
+
         except:
+            warning('No se puede registrar una nueva cuenta porque no se encontraron algunos elementos')
             self.check_challenge()
 
     def login(self, sv_cookies: bool=False, accept_nt: bool=False):
@@ -1046,11 +1117,12 @@ def main():
     bot.username = 'darkm31'
     #bot.pwd = 'password'
     
-    bot.init_ig()
+    #bot.init_ig()
+    bot.register('andresbellowazaa@gmail.com', 'Tolonso', 'tolotet22', 'asd', '23/2/1997')
     #bot.wait('micro')
     #bot.show_window()
-    bot.accept_notifications(False)
-    bot.comment_post('https://www.instagram.com/p/C3tRu41pVEE/', '.')
+    #bot.accept_notifications(False)
+    #bot.comment_post('https://www.instagram.com/p/C3tRu41pVEE/', '.')
     #bot.unfollow_users(['lucasmeloryt'])
     #bot.like_posts('lucasmeloryt')
     #bot.upload_post('Desktop/kk.png', 'Somethingsomethingsomething')
@@ -1058,7 +1130,7 @@ def main():
     #print(bot.follow_by_hashtag('#programacionvenezuela'))
     #time.sleep(1000)
 
-    #bot.close()
+    #bot.close() 
 
 if __name__ == "__main__":
     main()

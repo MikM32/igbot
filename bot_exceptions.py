@@ -73,5 +73,27 @@ class LoginNoPasswordException(Exception):
     def __init__(self):
         self.msg = "No se ingreso una password para iniciar sesion"
         super().__init__(self.msg)
+
+class RegisterUsernameInUse(Exception):
+    def __init__(self, msg:str):
+        super().__init__(msg)
+
+class RegisterPasswordBelowSix(Exception):
+    def __init__(self, msg:str):
+        super().__init__(msg)
+
+class RegisterInvalidEmail(Exception):
+    def __init__(self, msg:str):
+        super().__init__(msg)
+
+class RegisterInvalidUsername(Exception):
+    def __init__(self, msg:str):
+        super().__init__(msg)
+
+class RegisterInvalidBirthdate(Exception):
+    def __init__(self):
+        self.msg = 'Fecha de nacimiento invalida, la fecha debe contener dia/mes/año'
+        super().__init__(self.msg)
+
 def warning(msg:str):
     print(f"Advertencia!: {msg}")
