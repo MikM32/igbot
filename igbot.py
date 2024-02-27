@@ -115,7 +115,8 @@ class Browser:
 
             -close_browser_handler()
     """
-    def __init__(self, browser_path: str='',
+    def __init__(self,
+                 browser_path: str='',
                  custom_b_handler: webdriver.Chrome = None,
                  use_vpn: bool = False,
                  headless: bool = False):
@@ -125,6 +126,7 @@ class Browser:
         self.is_headless = headless
         self.use_vpn = use_vpn
         self.__is_hide = False
+        self.__first_run = False
 
         if(not browser_path):
              self.def_browser = default_browser.get_browser_exepath()
@@ -180,7 +182,15 @@ class Browser:
             full_path = os.path.join(os.getcwd(), URBAN_VPN_EXT_PATH)
             self.options.add_argument(f'--load-extension={full_path}')
         #full_profile_path = os.path.join(os.getcwd(), PROFILE_PATH)
+        
+        #user_path = os.environ['userprofile']
+        #if self._check_profile_exists(user_path, 'IgbotData'):
         self.options.add_argument(f'--profile-directory=Default')
+        #else:
+        #    self.options.add_argument(f'--args')
+        #    self.options.add_argument(f'--profile-directory="IgbotData"')
+        #    self.options.add_argument(f'--first-run')
+        #    self.__first_run = True
 
         #Este parametro evita que aparezca el mensaje "Un software automatizado esta controlando chrome"
         self.options.add_experimental_option('excludeSwitches', ["enable-automation"])
@@ -195,7 +205,9 @@ class Browser:
         if(not os.path.exists(self.webdriver_path)):
             cache_manager = DriverCacheManager(WEBDRIVER_ROOT_PATH) #Especifica la ruta de descarga e instalacion del webdriver
             current_version = default_browser.get_chrome_version()
+            warning('Actualizando webdriver...')
             self.service = CService(ChromeDriverManager(driver_version=current_version, cache_manager=cache_manager).install())
+            
         else:
             self.service = CService(executable_path=self.webdriver_path)
         self.browser_handler = webdriver.Chrome(options=self.options, service=self.service)
@@ -206,7 +218,13 @@ class Browser:
     #    self.options.binary = self.def_browser
     #    self.service = FService(executable_path=self.webdriver_path)
     #    self.browser_handler = webdriver.Firefox(options=self.options, service=self.service)
+    def _check_profile_exists(self, user_path:str, profile:str) ->bool:
 
+        chrome_data = user_path + CHROME_DATA_PATH + profile
+        if not os.path.exists(chrome_data):
+            return False
+        return True
+    
     def hide_window(self, inital_page: bool=False):
         if not self.__is_hide:
             try:
@@ -228,14 +246,27 @@ class Browser:
             except Exception as e:
                 warning(f'No se pudo mostrar la ventana: {e}')
 
+    # def _install_vpn_ext(self):
+    #     self.browser_handler.get(WEBSTORE_VPN_LINK)
+
+    #     locator = (By.CLASS_NAME, INSTALL_BT)
+    #     install_button = get_element(self.browser_handler, locator)
+    #     install_button.click()
+
     def init_browser_handler(self):
         """"
             Inicializa el webdriver
         """
         if self.browser_handler is not None:
             return
+        
         if "Chrome" in self.def_browser:
             self._init_chrome()
+
+            #if self.__first_run:
+            #    ok_button = get_element(self.browser_handler, (By.ID, OK_BT_ID))
+            #    ok_button.click()
+            #    self._install_vpn_ext()
 
         #!!IMPORTANTE!!: Firefox perdera soporte por falta de metodos para evadir la deteccion de bots.
         #elif "Firefox" in self.def_browser:
@@ -335,39 +366,59 @@ class Browser:
         self.browser_handler.quit()
 
 #<------------------------------><------------------------------><------------------------------>
-class UrbanVpn:
+class UrbanVpn(Browser):
     
     def __init__(self,
-                 h_browser: webdriver.Chrome,
+                 browser_path: str='',
+                 custom_b_handler: webdriver.Chrome = None,
+                 use_vpn: bool = True,
+                 headless: bool = False
                  #country: str,
                  #ad_block: bool,
                  #anti_phish: bool
                  ):
-        self.browser_handler = h_browser
+
+        super().__init__(browser_path, custom_b_handler, use_vpn, headless)
         #self.country = country
         #self.ad_block = ad_block
         #self.anti_phish = anti_phish
+
         self.__is_in_page = False
+        self.__is_active = False
+        self.__first_use = True
 
         
     def init_page(self):
+        
+        self.browser_handler.switch_to.new_window('vpnw')
         self.browser_handler.implicitly_wait(4)
         self.browser_handler.get(URBAN_VPN_LINK)
         self.__is_in_page = True
         
-        WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.number_of_windows_to_be(2))
+        if not self.__first_use:
+            return
+        WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.number_of_windows_to_be(3))
         current_handle = self.browser_handler.current_window_handle
         
-        for handle in self.browser_handler.window_handles:
+        for handle in self.browser_handler.window_handles[::-1]:
             if handle != current_handle:
                 self.browser_handler.switch_to.window(handle)
                 self.browser_handler.close()
                 break
+                # try:
+                #     WebDriverWait(self.browser_handler, 3).until(EC.title_is('VPN for Desktop - Maximum Security & Browsing | UrbanVPN'))
+                #     self.browser_handler.close()
+                # except:
+                #     pass
+        
         self.browser_handler.switch_to.window(current_handle)
         self.accept_terms()
+        self.__first_use = False
         
     
     def accept_terms(self):
+        if not self.__is_in_page:
+            raise PageNotLoaded(URBAN_VPN_LINK)
         #WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located((By.CLASS_NAME, 'promotion__text')))
         get_element(self.browser_handler, (By.CLASS_NAME, 'promotion__text'))
 
@@ -375,7 +426,7 @@ class UrbanVpn:
             #terms_button = self.browser_handler.find_element(By.CLASS_NAME, 'consent-text-controls__action')
             terms_button = get_element(self.browser_handler, (By.CLASS_NAME, 'consent-text-controls__action'))
             terms_button.click()
-            self.browser_handler.implicitly_wait(1)
+            self.wait('nano')
             
             #self.browser.save_cookies('vpn')
         except NoSuchElementException:
@@ -385,8 +436,11 @@ class UrbanVpn:
 
     def activate(self):
         
-        if not self.__is_in_page:
+        if self.__is_active:
+            return
+        elif not self.__is_in_page:
             raise PageNotLoaded(URBAN_VPN_LINK)
+        
         try:
             c_locator = (By.CSS_SELECTOR, f'li[class="{LOCATION_ITEM_CLASS}"]')
             s_locator = (By.CSS_SELECTOR, f'div[class="{SELECTION_INPUT_CLASSES}"]')
@@ -408,23 +462,157 @@ class UrbanVpn:
 
             #WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located((By.CLASS_NAME, 'play-button--pause')))
             get_element(self.browser_handler, (By.CLASS_NAME, 'play-button--pause'))
+            locator = (By.CLASS_NAME, 'loader loader--animated primary-layout__loader')
+            WebDriverWait(self.browser_handler, WAIT_MAX).until_not(EC.presence_of_element_located(locator))
+            self.__is_active = True
+            self.wait('nano')
             #print('listo')
         except TimeoutException as e:
             warning('No se encontraron elementos necesarios para activar el vpn')
             warning(repr(e))
 
     def deactivate(self):
+        if not self.__is_active:
+            return
+        elif not self.__is_in_page:
+            raise PageNotLoaded(URBAN_VPN_LINK)
+        
+        self.wait('nano')
         #stop_button = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located((By.CLASS_NAME, 'play-button--pause')))
         stop_button = get_element(self.browser_handler, (By.CLASS_NAME, 'play-button--pause'))
         stop_button.click()
+        self.__is_active = False
+        self.wait('nano')
+
+    def switch_to_vpn(self):
+        
+        self.browser_handler.switch_to.window(self.browser_handler.window_handles[::-1][0])
 
     def close(self):
         self.__is_in_page = False
-        #self.browser_handler.close()
+        self.browser_handler.close()
     
 
 #<------------------------------><------------------------------><------------------------------>
+class ProtonMail(Browser):
 
+    def __init__(self,
+                 username:str='',
+                 pwd:str='',
+                 browser_path: str='',
+                 custom_b_handler: webdriver.Chrome = None,
+                 use_vpn: bool = False,
+                 headless: bool = False
+                 ):
+        
+        self.username = username
+        self.pwd = pwd
+        self.vpn = None
+
+        super().__init__(browser_path, custom_b_handler, use_vpn, headless)
+
+    def _init_vpn(self):
+        self.vpn = UrbanVpn(custom_b_handler=self.browser_handler)
+        prev_handle = self.browser_handler.current_window_handle
+        self.vpn.init_page()
+        self.browser_handler.switch_to.window(prev_handle)
+
+
+    def activate_vpn(self):
+        if not self.use_vpn:
+            raise IgBotNotInitializedVpn()
+        prev_handle = self.browser_handler.current_window_handle
+        self.vpn.switch_to_vpn()
+        self.vpn.activate()
+        self.browser_handler.switch_to.window(prev_handle)
+
+    def deactivate_vpn(self):
+        if not self.use_vpn:
+            raise IgBotNotInitializedVpn()
+        prev_handle = self.browser_handler.current_window_handle
+        self.vpn.switch_to_vpn()
+        self.vpn.deactivate()
+        self.browser_handler.switch_to.window(prev_handle)
+
+    def init_web(self):
+        if self.use_vpn:
+            self._init_vpn()
+        
+    def register(self, email:str, pwd:str ) -> str:
+        self.activate_vpn()
+        self.browser_handler.get(PROTONMAIL_REG_URL)
+
+        # locator = (By.CSS_SELECTOR, f'input[class="{PREG_EMAIL_INPUT_ID}"]:nth-child(2)')
+        # email_input = get_element(self.browser_handler, locator)
+
+        # locator = (By.CSS_SELECTOR, f'input[id="{PREG_PWD_INPUT_ID}"]')
+        # pwd_input = get_element(self.browser_handler, locator)
+
+        # locator = (By.CSS_SELECTOR, f'input[id="{PREG_CONFIRM_PWD_ID}"]')
+        # confirm_pwd_input = get_element(self.browser_handler, locator)
+
+        # email_input.send_keys(email)
+        # pwd_input.send_keys(pwd)
+        # confirm_pwd_input.send_keys(pwd)
+
+        locator = (By.CSS_SELECTOR, 'iframe[title="Nombre de usuario"]')
+        iframe = get_element(self.browser_handler, locator)
+
+        self.browser_handler.switch_to.frame(iframe)
+
+        user_input =  self.browser_handler.find_element(By.ID, 'email')
+
+        user_input.send_keys(email)
+
+        self.browser_handler.switch_to.default_content()
+
+        locator = (By.TAG_NAME, 'input')
+        inputs = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.visibility_of_any_elements_located(locator))
+
+        inputs[0].send_keys(pwd)
+        inputs[1].send_keys(pwd)
+
+        locator = (By.CSS_SELECTOR, f'button[type="submit"]')
+        submit_bt = get_element(self.browser_handler, locator)
+
+        submit_bt.click()
+
+        #resolver captcha
+        locator = (By.XPATH, "//h1[contains(text(), 'Verifica')]")
+        get_element(self.browser_handler, locator)
+        while EC.presence_of_element_located(locator):
+            # try:
+            #     self.browser_handler.find_element(By.XPATH, "//h1[contains(text(), 'Verifica')]")
+            #     continue
+            # except:
+            #     break
+            self.wait('micro')
+            pass
+
+        #omitir datos de recuperacion
+
+        #omitir introduccion
+
+        #listo
+
+    def login(self):
+        pass
+
+    def get_mail_content(self) -> str:
+        pass
+
+    def close(self):
+        if self.use_vpn:
+            prev_handle = self.browser_handler.current_window_handle
+            self.vpn.switch_to_vpn()
+            self.vpn.deactivate()
+            self.vpn.close()
+            self.browser_handler.switch_to.window(prev_handle)
+        
+        self.close_browser_handler()
+
+
+#<------------------------------><------------------------------><------------------------------>
 class IgBot(Browser):
     """
         Clase IgBot:
@@ -460,7 +648,7 @@ class IgBot(Browser):
         self.is_logged = False
         self.__is_in_page = False
 
-        super().__init__(browser_path, use_vpn, headless)
+        super().__init__(browser_path, custom_b_handler, use_vpn, headless)
 
         self._init_paths()
         self._init_db('instagram')
@@ -474,18 +662,36 @@ class IgBot(Browser):
         data.db_init(COOKIES_DB, webname)
         
     def _init_vpn(self):
-        self.vpn = UrbanVpn(self.browser_handler)
+        self.vpn = UrbanVpn(custom_b_handler=self.browser_handler)
+        prev_handle = self.browser_handler.current_window_handle
         self.vpn.init_page()
+        self.browser_handler.switch_to.window(prev_handle)
 
-        self.vpn.accept_terms()
-        self.vpn.activate()
-        self.wait('micro')
+        #self.wait('nano')
 
     def set_username(self, usr: str):
         self.username = usr
 
     def set_pwd(self, pwd: str):
         self.pwd = pwd
+
+    def activate_vpn(self):
+
+        if not self.use_vpn:
+            raise IgBotNotInitializedVpn()
+        prev_handle = self.browser_handler.current_window_handle
+        self.vpn.switch_to_vpn()
+        self.vpn.activate()
+        self.browser_handler.switch_to.window(prev_handle)
+
+    def deactivate_vpn(self):
+
+        if not self.use_vpn:
+            raise IgBotNotInitializedVpn()
+        prev_handle = self.browser_handler.current_window_handle
+        self.vpn.switch_to_vpn()
+        self.vpn.deactivate()
+        self.browser_handler.switch_to.window(prev_handle)
 
     def init_ig(self, preload_cookies:bool = True):
         """
@@ -496,6 +702,7 @@ class IgBot(Browser):
             self.hide_window(inital_page=True)
         if self.use_vpn:
             self._init_vpn()
+
         self.browser_handler.implicitly_wait(5)
         if preload_cookies:
             if self.username:
@@ -591,7 +798,8 @@ class IgBot(Browser):
         birth_date = birth.split('/')
         if(len(birth_date) < 3):
             raise RegisterInvalidBirthdate()
-    
+
+
         self.browser_handler.get(IG_REGISTRATION_URL)
         try:
             inputs = get_elements(self.browser_handler, (By.TAG_NAME, 'input'))
@@ -656,6 +864,16 @@ class IgBot(Browser):
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
                 self.register(email, name, username, pwd, birth)
+
+    def create_new_account(self) -> tuple[str]:
+
+        self.activate_vpn()
+        proton = ProtonMail(use_vpn=True)
+        proton.init_browser_handler()
+        proton.init_web()
+        proton.activate_vpn()
+        data = proton.register('wazacaca1ss2', '12345678.')
+
 
     def login(self, sv_cookies: bool=False, accept_nt: bool=False):
         
@@ -760,6 +978,11 @@ class IgBot(Browser):
         except NoLoggedSession:
             warning('close(): no hay una sesion abierta')
             pass
+        prev_handle = self.browser_handler.current_window_handle
+        self.vpn.switch_to_vpn()
+        self.vpn.deactivate()
+        self.vpn.close()
+        self.browser_handler.switch_to.window(prev_handle)
         self.close_browser_handler()
     
     def open_followers_list(self):
@@ -1182,11 +1405,20 @@ class IgBot(Browser):
     
 
 def main():
-    bot = IgBot(headless=False)
-    bot.set_username('darkm31')
+    proton = ProtonMail(use_vpn=True)
+
+    proton.init_browser_handler()
+    proton.init_web()
+    #proton.activate_vpn()
+    proton.register("ayahuasca3232", "987654321.")
+    #bot = IgBot(use_vpn=True)
+    #bot.set_username('darkm31')
     #bot.pwd = 'password'
     
     #bot.init_ig()
+    
+    #bot.create_new_account()
+    #bot.close()
     #bot.register('andresbellowazaa@gmail.com', 'Tolonso', 'tolotet22', 'asd', '23/2/1997')
     #bot.wait('micro')
     #bot.show_window()

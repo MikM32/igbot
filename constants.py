@@ -14,9 +14,30 @@ URBAN_VPN_LINK = f'chrome-extension://{URBAN_VPN_EXT_ID}/popup/index.html'
 IG_URL = 'https://www.instagram.com'
 IG_REGISTRATION_URL = IG_URL+'/accounts/emailsignup/'
 IG_EXPLORE_TAG = IG_URL+'/explore/tags/'
+CHROME_DATA_PATH = '\\AppData\\Local\\Google\\Chrome\\User Data\\'
+WEBSTORE_VPN_LINK = 'https://chromewebstore.google.com/detail/urban-vpn-proxy/eppiocemhmnlbhjplcgkofciiegomcon?hl=es'
+INSTALL_BT = 'UywwFc-LgbsSe UywwFc-LgbsSe-OWXEXe-dgl2Hf'
 
 #tiempo de espera maximo
 WAIT_MAX = 60
+
+#chrome first run
+OK_BT_ID= 'ackButton'
+
+#Protonmail
+PROTONMAIL_REG_URL = 'https://account.proton.me/es/mail/signup?plan=free&billing=12&minimumCycle=12&currency=EUR&ref=prctbl'
+PREG_EMAIL_INPUT_ID = 'email'
+PREG_PWD_INPUT_ID = 'password'
+PREG_CONFIRM_PWD_ID = 'repeat-password'
+#data-testid="tab-header-captcha-button"
+PREG_LATER = 'button w-full button-large button-ghost-norm mt-2'
+PREG_LATER_CONFIRM = 'button w-full button-medium button-solid-norm'
+
+PINBOX_INFO_NEXT = 'button w-full button-large button-outline-weak'
+PINBOX_OMIT = 'button w-full button-large button-outline-weak'
+PINBOX_CLASS = 'w-full shrink-0'
+PINBOX_MAIL_ITEM = 'item-container-wrapper relative'
+PINBOX_SUBJECT_SPAN = 'max-w-full text-ellipsis text-semibold'
 
 #mensajes
 LOGIN_INCORRECT_PWD_MSG = 'Tu contraseña no es correcta'

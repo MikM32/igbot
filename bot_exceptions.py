@@ -95,5 +95,10 @@ class RegisterInvalidBirthdate(Exception):
         self.msg = 'Fecha de nacimiento invalida, la fecha debe contener dia/mes/año'
         super().__init__(self.msg)
 
+class IgBotNotInitializedVpn(Exception):
+    def __init__(self):
+        self.msg = 'No se ha inicializado el atributo: IgBot.vpn'
+        super().__init__(self.msg)
+
 def warning(msg:str):
     print(f"Advertencia!: {msg}")
