@@ -610,16 +610,16 @@ class ProtonMail(Browser):
         submit_bt.click()
 
         #resolver captcha
-        locator = (By.XPATH, "//h1[contains(text(), 'Verifica')]")
-        get_element(self.browser_handler, locator)
-        while EC.presence_of_element_located(locator):
-            # try:
-            #     self.browser_handler.find_element(By.XPATH, "//h1[contains(text(), 'Verifica')]")
-            #     continue
-            # except:
-            #     break
-            self.wait('micro')
-            pass
+        #locator = (By.XPATH, "//h1[contains(text(), 'Verifica')]")
+        #get_element(self.browser_handler, locator)
+        while True:
+            try:
+                 self.browser_handler.find_element(By.XPATH, "//h1[contains(text(), 'Verifica')]")
+                 self.wait('micro')
+                 continue
+            except:
+                 break
+            
 
         try:
             locator = (By.CSS_SELECTOR, f'button[class="{PNAME_NEXT}"]')
