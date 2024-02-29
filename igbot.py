@@ -1,5 +1,5 @@
-""" 
-    Bot para Instagram 
+"""
+    Bot para Instagram
     Autor: Miguel Matute
     Fecha: 05/01/2024
 
@@ -37,6 +37,8 @@ from win32gui import GetWindowText
 from win32gui import EnumWindows
 from win32gui import ShowWindow
 
+from faker import Faker
+
 import default_browser
 import data
 
@@ -58,7 +60,7 @@ def get_webdriver_path(browser_type: str) -> str:
     #    webdriver_path+= "geckodriver.exe"
     else:
         raise UncompatibleDefaultBrowser(browser_type)
-    
+
     return webdriver_path
 
 def display_window(wintitle:str, display:bool):
@@ -74,13 +76,38 @@ def display_window(wintitle:str, display:bool):
     else:
         EnumWindows(hide_callback, 0)
 
+
+def gen_birth() -> tuple[int]:
+
+    faker = Faker(['es_MX'])
+    date = faker.date_of_birth(minimum_age=19, maximum_age=30)
+    
+
+    return date.day, date.month, date.year
+
+def gen_name() -> str:
+    faker = Faker(['es_MX'])
+
+    return faker.first_name()
+
+def gen_email() -> str:
+    faker = Faker(['es_MX'])
+
+    return chr(secrets.randbelow(20)+97) + faker.last_name().lower() + str(secrets.randbelow(200))
+
+def gen_pwd() -> str:
+    #faker = Faker(['es_MX'])
+
+    return secrets.token_hex(8)
+
+
 get_element = lambda bhandler, locator: WebDriverWait(bhandler, WAIT_MAX).until(EC.presence_of_element_located(locator))
 """
     funcion que espera 60 segundos a que un elemento cargue y luego lo retorna
 """
 get_elements = lambda bhandler, locator: WebDriverWait(bhandler, WAIT_MAX).until(EC.presence_of_all_elements_located(locator))
 """
-    funcion que espera 60 segundos a que todos los elementos especificador por el locator esten cargados luego devuelve la lista de los elementos 
+    funcion que espera 60 segundos a que todos los elementos especificador por el locator esten cargados luego devuelve la lista de los elementos
 """
 
 get_clickable_element = lambda bhandler, locator: WebDriverWait(bhandler, WAIT_MAX).until(EC.element_to_be_clickable(locator))
@@ -120,7 +147,7 @@ class Browser:
                  custom_b_handler: webdriver.Chrome = None,
                  use_vpn: bool = False,
                  headless: bool = False):
-        
+
         self.webdriver_path = None
         self.def_browser = None
         self.is_headless = headless
@@ -138,12 +165,12 @@ class Browser:
         self.options = None
         self.service = None
         self.sleep_secs = None
-    
+
     def _patch_chromedriver(self):
         """
             Reemplaza la JSfingerprint del webdriver para evitar detecciones
         """
-        
+
         data = None
         old_fingerprint = None
 
@@ -159,13 +186,13 @@ class Browser:
 
         new_fingerprint = secrets.choice(['lll', 'AaA', 'oAo', 'kol', 'Akr', 'PlP', 'mel', 'yes', 'nop', 'ghi', 'cgi'])
         new_fingerprint+= '_'
-        
+
         data = data.replace(bytes(old_fingerprint, 'ansi'), bytes(new_fingerprint, 'ansi'))
 
         with open(self.webdriver_path, 'wb') as fso:
             fso.write(data)
         del data
-        
+
         with open(PATCH_INFO_PATH, 'w') as fso:
             fso.write(new_fingerprint)
 
@@ -182,7 +209,7 @@ class Browser:
             full_path = os.path.join(os.getcwd(), URBAN_VPN_EXT_PATH)
             self.options.add_argument(f'--load-extension={full_path}')
         #full_profile_path = os.path.join(os.getcwd(), PROFILE_PATH)
-        
+
         #user_path = os.environ['userprofile']
         #if self._check_profile_exists(user_path, 'IgbotData'):
         self.options.add_argument(f'--profile-directory=Default')
@@ -207,7 +234,7 @@ class Browser:
             current_version = default_browser.get_chrome_version()
             warning('Actualizando webdriver...')
             self.service = CService(ChromeDriverManager(driver_version=current_version, cache_manager=cache_manager).install())
-            
+
         else:
             self.service = CService(executable_path=self.webdriver_path)
         self.browser_handler = webdriver.Chrome(options=self.options, service=self.service)
@@ -224,7 +251,7 @@ class Browser:
         if not os.path.exists(chrome_data):
             return False
         return True
-    
+
     def hide_window(self, inital_page: bool=False):
         if not self.__is_hide:
             try:
@@ -237,7 +264,7 @@ class Browser:
                 self.__is_hide = True
             except Exception as e:
                 warning(f'No se pudo ocultar la ventana: {e}')
-    
+
     def show_window(self):
         if self.__is_hide:
             try:
@@ -259,7 +286,7 @@ class Browser:
         """
         if self.browser_handler is not None:
             return
-        
+
         if "Chrome" in self.def_browser:
             self._init_chrome()
 
@@ -273,15 +300,15 @@ class Browser:
         #    self._init_firefox()
         else:
             raise UncompatibleDefaultBrowser(self.def_browser)
-        
+
 
     def save_cookies(self, webname: str, username: str):
         """
-            metodo que guarda las cookies de sesion del usuario actual en la base de datos. 
+            metodo que guarda las cookies de sesion del usuario actual en la base de datos.
             El formato de los nombres en el campo Usuarios de la base de datos es: NOMBRE_DE_WEB+_+USERNAME.
 
-             Por ejemplo: para un usuario de instagram seria webname = 'instagram', username= 'fulano123.' 
-             y por lo tanto se guardaria en la base de datos como instagram_fulano123. 
+             Por ejemplo: para un usuario de instagram seria webname = 'instagram', username= 'fulano123.'
+             y por lo tanto se guardaria en la base de datos como instagram_fulano123.
         """
 
         cookies = self.browser_handler.get_cookies()
@@ -306,7 +333,7 @@ class Browser:
             #    cookies = json.load(file_cookie)
 
             cookies = data.db_load_cookies(COOKIES_DB, webname, username)
-            
+
             self.browser_handler.execute_cdp_cmd('Network.enable',{})
 
             for cookie in cookies:
@@ -315,13 +342,13 @@ class Browser:
 
             self.browser_handler.execute_cdp_cmd('Network.disable', {})
         except FileNotFoundError:
-            raise CookiesDontExists(username)     
+            raise CookiesDontExists(username)
 
     def refresh(self):
         if not self.browser_handler:
             raise NotInitizalizedHandler()
-        self.browser_handler.refresh()      
-        
+        self.browser_handler.refresh()
+
     def wait(self, type: str=''):
         """
             Metodo que hace esperar al navegador unos segundos
@@ -330,7 +357,7 @@ class Browser:
         """
         int_interval = 2
         int_offset = 0
-        float_interval = 9 
+        float_interval = 9
 
         if not type:
             int_offset = 4
@@ -352,7 +379,7 @@ class Browser:
 
         self._update_sleep_secs(float_interval, int_interval, int_offset)
         time.sleep(self.sleep_secs)
-    
+
     def _update_sleep_secs(self, float_interval: int, int_interval: int, int_offset: int):
         float_part = secrets.randbelow(float_interval) / 10
         int_part = secrets.randbelow(int_interval) + int_offset
@@ -362,12 +389,12 @@ class Browser:
 
         if(not self.browser_handler): #self.browser_handler == None
             raise NotInitizalizedHandler()
-            
+
         self.browser_handler.quit()
 
 #<------------------------------><------------------------------><------------------------------>
 class UrbanVpn(Browser):
-    
+
     def __init__(self,
                  browser_path: str='',
                  custom_b_handler: webdriver.Chrome = None,
@@ -387,19 +414,19 @@ class UrbanVpn(Browser):
         self.__is_active = False
         self.__first_use = True
 
-        
+
     def init_page(self):
-        
+
         self.browser_handler.switch_to.new_window('vpnw')
         self.browser_handler.implicitly_wait(4)
         self.browser_handler.get(URBAN_VPN_LINK)
         self.__is_in_page = True
-        
+
         if not self.__first_use:
             return
         WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.number_of_windows_to_be(3))
         current_handle = self.browser_handler.current_window_handle
-        
+
         for handle in self.browser_handler.window_handles[::-1]:
             if handle != current_handle:
                 self.browser_handler.switch_to.window(handle)
@@ -410,12 +437,12 @@ class UrbanVpn(Browser):
                 #     self.browser_handler.close()
                 # except:
                 #     pass
-        
+
         self.browser_handler.switch_to.window(current_handle)
         self.accept_terms()
         self.__first_use = False
-        
-    
+
+
     def accept_terms(self):
         if not self.__is_in_page:
             raise PageNotLoaded(URBAN_VPN_LINK)
@@ -427,20 +454,20 @@ class UrbanVpn(Browser):
             terms_button = get_element(self.browser_handler, (By.CLASS_NAME, 'consent-text-controls__action'))
             terms_button.click()
             self.wait('nano')
-            
+
             #self.browser.save_cookies('vpn')
         except NoSuchElementException:
             #warning('no cargo la pagina para aceptar terminos')
             pass
-        
+
 
     def activate(self):
-        
+
         if self.__is_active:
             return
         elif not self.__is_in_page:
             raise PageNotLoaded(URBAN_VPN_LINK)
-        
+
         try:
             c_locator = (By.CSS_SELECTOR, f'li[class="{LOCATION_ITEM_CLASS}"]')
             s_locator = (By.CSS_SELECTOR, f'div[class="{SELECTION_INPUT_CLASSES}"]')
@@ -476,7 +503,7 @@ class UrbanVpn(Browser):
             return
         elif not self.__is_in_page:
             raise PageNotLoaded(URBAN_VPN_LINK)
-        
+
         self.wait('nano')
         #stop_button = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located((By.CLASS_NAME, 'play-button--pause')))
         stop_button = get_element(self.browser_handler, (By.CLASS_NAME, 'play-button--pause'))
@@ -485,13 +512,13 @@ class UrbanVpn(Browser):
         self.wait('nano')
 
     def switch_to_vpn(self):
-        
+
         self.browser_handler.switch_to.window(self.browser_handler.window_handles[::-1][0])
 
     def close(self):
         self.__is_in_page = False
         self.browser_handler.close()
-    
+
 
 #<------------------------------><------------------------------><------------------------------>
 class ProtonMail(Browser):
@@ -504,7 +531,7 @@ class ProtonMail(Browser):
                  use_vpn: bool = False,
                  headless: bool = False
                  ):
-        
+
         self.username = username
         self.pwd = pwd
         self.vpn = None
@@ -519,7 +546,7 @@ class ProtonMail(Browser):
 
 
     def activate_vpn(self):
-        if not self.use_vpn:
+        if not self.vpn:
             raise IgBotNotInitializedVpn()
         prev_handle = self.browser_handler.current_window_handle
         self.vpn.switch_to_vpn()
@@ -527,7 +554,7 @@ class ProtonMail(Browser):
         self.browser_handler.switch_to.window(prev_handle)
 
     def deactivate_vpn(self):
-        if not self.use_vpn:
+        if not self.vpn:
             raise IgBotNotInitializedVpn()
         prev_handle = self.browser_handler.current_window_handle
         self.vpn.switch_to_vpn()
@@ -537,9 +564,14 @@ class ProtonMail(Browser):
     def init_web(self):
         if self.use_vpn:
             self._init_vpn()
+
+    def create_new_account(self) -> tuple[str]:
         
-    def register(self, email:str, pwd:str ) -> str:
-        self.activate_vpn()
+        return self.register(gen_email(), gen_pwd())
+                             
+    def register(self, email:str, pwd:str ) -> tuple[str]:
+        if self.use_vpn:
+            self.activate_vpn()
         self.browser_handler.get(PROTONMAIL_REG_URL)
 
         # locator = (By.CSS_SELECTOR, f'input[class="{PREG_EMAIL_INPUT_ID}"]:nth-child(2)')
@@ -589,6 +621,33 @@ class ProtonMail(Browser):
             self.wait('micro')
             pass
 
+        try:
+            locator = (By.CSS_SELECTOR, f'button[class="{PNAME_NEXT}"]')
+            next_bt2 = get_element(self.browser_handler, locator)
+            next_bt2.click()
+
+            locator = (By.XPATH, "//button[contains(text(), 'tarde')]")
+            omit_bt = get_element(self.browser_handler, locator)
+            omit_bt.click()
+
+            locator = (By.XPATH, "//button[contains(text(), 'Confirmar')]")
+            omit_bt = get_element(self.browser_handler, locator)
+            omit_bt.click()
+
+            locator = (By.XPATH, "//button[contains(text(), 'Siguiente')]")
+            omit_bt = get_element(self.browser_handler, locator)
+            omit_bt.click()
+            locator = (By.XPATH, "//button[contains(text(), 'siguiente')]")
+            omit_bt = get_element(self.browser_handler, locator)
+            omit_bt.click()
+            locator = (By.XPATH, "//button[contains(text(), 'Omitir')]")
+            omit_bt = get_element(self.browser_handler, locator)
+            omit_bt.click()
+        except:
+            warning('algunos elementos no se pudieron cargar')
+        
+        return email, pwd
+
         #omitir datos de recuperacion
 
         #omitir introduccion
@@ -608,7 +667,7 @@ class ProtonMail(Browser):
             self.vpn.deactivate()
             self.vpn.close()
             self.browser_handler.switch_to.window(prev_handle)
-        
+
         self.close_browser_handler()
 
 
@@ -627,12 +686,12 @@ class IgBot(Browser):
 
                 * __init__(*args):
                     args contiene un parametro opcional que seria la ruta del webdriver especificada por el usuario
-                
+
                 * init_ig():
                     carga la pagina principal de instagram
-                
+
                 * login(user: str, pwd: str):
-                    inicia sesion con una cuenta en instagram 
+                    inicia sesion con una cuenta en instagram
     """
     def __init__(self,
                  username: str='',
@@ -641,7 +700,7 @@ class IgBot(Browser):
                  custom_b_handler: webdriver.Chrome = None,
                  use_vpn: bool = False,
                  headless:bool = False):
-        
+
         self.username = username
         self.pwd = pwd
         self.vpn = None
@@ -656,11 +715,11 @@ class IgBot(Browser):
     def _init_paths(self):
         if(not os.path.exists(COOKIES_PATH)):
             os.mkdir(COOKIES_PATH)
-    
+
     def _init_db(self, webname: str):
-        
+
         data.db_init(COOKIES_DB, webname)
-        
+
     def _init_vpn(self):
         self.vpn = UrbanVpn(custom_b_handler=self.browser_handler)
         prev_handle = self.browser_handler.current_window_handle
@@ -714,7 +773,7 @@ class IgBot(Browser):
                     self.is_logged = False
             else:
                 raise IgUsernameNotFound()
-        
+
         self.browser_handler.get(IG_URL)
         self.__is_in_page = True
 
@@ -726,7 +785,7 @@ class IgBot(Browser):
             da click en aceptar o rechazar en la ventana emergente de notificaciones dependiendo del parametro accept
         """
         self._check_login('No se puede ejecutar el metodo: accept_notifications()')
-        
+
         self.wait('micro')
         try:
 
@@ -748,7 +807,7 @@ class IgBot(Browser):
                 accept_button.click()
             else:
                 no_accept_button.click()
-            
+
             #self.save_cookies('instagram', self.username)
         except Exception:
             warning("No se encuentra la ventana de notificaciones.")
@@ -763,7 +822,7 @@ class IgBot(Browser):
             si se inicia sesion con datos (password y username), acepta o rechaza el uso de cookies de sesion.
         """
         self._check_login('No se puede ejecutar el metodo: accept_session_cookies()')
-        
+
         self.wait()
         try:
             #accept_button = self.browser_handler.find_element(By.XPATH, SAVE_SCOOKIES_XPATH)
@@ -785,7 +844,7 @@ class IgBot(Browser):
         finally:
             self.save_cookies('instagram', self.username)
             self.wait('micro')
-        
+
     def register(self, email: str, name: str, username: str, pwd: str, birth: str):
 
         try:
@@ -827,7 +886,7 @@ class IgBot(Browser):
                     raise RegisterInvalidUsername(error_alert.text)
             except:
                 pass
-        
+
 
             locator = (By.CSS_SELECTOR, f'select[class="{DATE_SELECTORS}"]')
             selectors = get_elements(self.browser_handler, locator)
@@ -840,9 +899,9 @@ class IgBot(Browser):
 
                 self.browser_handler.execute_script('arguments[0].scrollIntoView();', cur_opt)
                 cur_opt.click()
-            
 
-            
+
+
             locator = (By.CSS_SELECTOR, f'button[class="{REG_NEXT_BT}"]')
             next_bt = get_element(self.browser_handler, locator)
 
@@ -854,7 +913,7 @@ class IgBot(Browser):
 
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_ACTIVE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
-            
+
             #Aqui deberia llamar algun metodo que revise el correo en busqueda de correo de verificacion y que lo retorne
 
         except:
@@ -876,13 +935,13 @@ class IgBot(Browser):
 
 
     def login(self, sv_cookies: bool=False, accept_nt: bool=False):
-        
+
         if not self.__is_in_page:
             raise PageNotLoaded(IG_URL)
         if self.is_logged:
             warning('login(): No se puede iniciar sesion porque ya se ha iniciado sesion con una cuenta, debe cerrar sesion primero.')
             return
-        
+
         if not self.username:
             raise LoginNoUserException()
         elif not self.pwd:
@@ -898,7 +957,7 @@ class IgBot(Browser):
             login_button.click()
         except NoSuchElementException:
             raise InvalidInputData()
-            
+
         self.wait('micro')
 
         try:
@@ -917,7 +976,7 @@ class IgBot(Browser):
             Busca cuentas o hashtags por medio de la barra de busqueda de la pagina.
         """
         self._check_login("No se pueden buscar cuentas si no se ha iniciado sesion con una cuenta previamente.")
-        
+
         try:
             search_button = self.browser_handler.find_element(By.CSS_SELECTOR, 'svg[aria-label="Búsqueda"]')
             search_button.click()
@@ -929,13 +988,13 @@ class IgBot(Browser):
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
                 self.search_for(searching)
-        
+
         try:
             self.wait()
             search_input = self.browser_handler.find_element(By.CSS_SELECTOR, 'input')
             search_input.send_keys(searching)
             search_input.send_keys(Keys.ENTER)
-            
+
         except NoSuchElementException as e:
             warning(f'search_for(): no se ha encontrado el input de busqueda.{e}')
             if self.check_challenge():
@@ -943,7 +1002,7 @@ class IgBot(Browser):
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
                 self.search_for(searching)
-        
+
         try:
             self.wait()
             element_located = EC.presence_of_element_located
@@ -957,8 +1016,8 @@ class IgBot(Browser):
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
                 self.search_for(searching)
-        
-        
+
+
     def logout(self):
         """
         Cierra la sesion actual.
@@ -984,16 +1043,16 @@ class IgBot(Browser):
         self.vpn.close()
         self.browser_handler.switch_to.window(prev_handle)
         self.close_browser_handler()
-    
+
     def open_followers_list(self):
-        self._check_login()       
+        self._check_login()
         try:
             locator = (By.CSS_SELECTOR, f'ul[class="{AC_INFO_SECTION_CLASSES}"]')
 
             #Espera hasta que cargue la seccion de informacion de la cuenta (Seguidos, Seguidores, etc)
             #WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
             get_element(self.browser_handler, locator)
-                
+
             followers_link = self.browser_handler.find_element(By.CSS_SELECTOR, f'li[class="{AC_FOLLOWERS_LINK_CLASSES}"]:nth-child(2)')
             followers_link.click()
         except TimeoutError:
@@ -1003,16 +1062,16 @@ class IgBot(Browser):
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
                 self.open_followers_list()
-    
+
     def open_following_list(self):
-        self._check_login()       
+        self._check_login()
         try:
             locator = (By.CSS_SELECTOR, f'ul[class="{AC_INFO_SECTION_CLASSES}"]')
 
             #Espera hasta que cargue la seccion de informacion de la cuenta (Seguidos, Seguidores, etc)
             #WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
             get_element(self.browser_handler, locator)
-                
+
             followers_link = get_element(self.browser_handler, (By.CSS_SELECTOR, f'li[class="{AC_FOLLOWERS_LINK_CLASSES}"]:nth-child(3)'))
             followers_link.click()
         except TimeoutException:
@@ -1022,12 +1081,12 @@ class IgBot(Browser):
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
                 self.open_following_list()
-    
+
     def follow_by_hashtag(self, hashtag: str, like_posts: bool, limit: int=30) -> list[str]:
         """
     #       follow_by_Hashtag(hashtag: str, limit: int) -> list[str]
 
-            -Funcion para seguir cuentas aleatorias a partir de los likes 
+            -Funcion para seguir cuentas aleatorias a partir de los likes
             de un post aleatorio obtenido de un determinado hashtag.
 
     #       Parametros:
@@ -1048,7 +1107,7 @@ class IgBot(Browser):
         """
         #if not self.is_logged:
         #    raise NoLoggedSession('No se puede buscar cuentas por hashtag si no se ha iniciado sesion con una cuenta previamente.')
-        
+
         self.search_for(hashtag)
         self.wait('micro')
 
@@ -1060,7 +1119,7 @@ class IgBot(Browser):
             raise ResultsNotFound(hashtag)
         except NoSuchElementException:
             pass
-        
+
         #self.wait()
 
         print('->'+ self.browser_handler.current_url)
@@ -1069,7 +1128,7 @@ class IgBot(Browser):
         account_users = []
 
         try:
-            
+
             rows_locator = (By.CSS_SELECTOR, 'div[class="_ac7v  _al3n"]')
             #rows = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(rows_locator))
             rows = get_elements(self.browser_handler, rows_locator)
@@ -1104,7 +1163,7 @@ class IgBot(Browser):
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
                 account_users = self.follow_by_hashtag(hashtag, like_posts, limit)
-        
+
         try:
             self.wait('micro')
             self.open_followers_list()
@@ -1137,11 +1196,11 @@ class IgBot(Browser):
                 else:
                     prev_len = followers_len
 
-            
+
             for account in account_list:
                 ac_span = account.find_element(By.CSS_SELECTOR, f'span[class="{AC_FOLLOWER_NAME_CLASSES}"]')
                 ac_follow_bt = account.find_element(By.CSS_SELECTOR, f'button[class="{AC_FOLLOWER_FOLLOW_BT_CLASSES}"]')
-                
+
                 self.browser_handler.execute_script('arguments[0].scrollIntoView()', ac_follow_bt)
                 account_users.append(ac_span.text)
 
@@ -1159,7 +1218,7 @@ class IgBot(Browser):
                 account_users = self.follow_by_hashtag(hashtag, like_posts, limit)
 
         return account_users
-    
+
     def like_posts(self, user: str, limit: int = 3):
         """
             metodo que da like a una cantidad de posts especificada por limit de una cuenta especificada por user
@@ -1192,7 +1251,7 @@ class IgBot(Browser):
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
                 self.like_posts(user, limit)
-            
+
         #---------- En desarrollo ----------
 
 
@@ -1210,7 +1269,7 @@ class IgBot(Browser):
         """
         self._check_login()
         #print('->'+ self.browser_handler.current_url)
-        
+
         self.wait('nano')
         try:
             locator = (By.CSS_SELECTOR, f'div[class="{LEFT_BAR_DIV_CLASS}"]')
@@ -1224,7 +1283,7 @@ class IgBot(Browser):
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
                 self.open_my_profile()
-            
+
         #print('->'+ self.browser_handler.current_url)
 
 
@@ -1242,7 +1301,7 @@ class IgBot(Browser):
 
             #Espera hasta que cargue la seccion de informacion de la cuenta (Seguidos, Seguidores, etc)
             WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
-                
+
             followers_link = self.browser_handler.find_element(By.CSS_SELECTOR, f'li[class="{AC_FOLLOWERS_LINK_CLASSES}"]:nth-child(2)')
             followers_num = int(followers_link.text.replace(' seguidores', ''))
 
@@ -1255,7 +1314,7 @@ class IgBot(Browser):
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
                 followers_num = self.my_followers_num()
-        
+
         return followers_num
 
     def unfollow_users(self, users: list[str]):
@@ -1284,11 +1343,11 @@ class IgBot(Browser):
                         self.wait()
                     self.unfollow_users(users)
 
-        
+
 
     def upload_post(self, post_img_path: str, post_txt: str=''):
         """
-            Esta funcion sube una publicacion a la cuenta, post_img_path es la cadena donde va la ruta de la imagen a postear 
+            Esta funcion sube una publicacion a la cuenta, post_img_path es la cadena donde va la ruta de la imagen a postear
             y post_txt la cadena donde va la descripcion del post.
         """
         self.wait('micro')
@@ -1297,24 +1356,24 @@ class IgBot(Browser):
             #upload_post_bt = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
             upload_post_bt = get_element(self.browser_handler, locator)
             upload_post_bt.click()
-            
+
             locator = (By.CSS_SELECTOR, f'input[class="{SECRET_IGM_INPUT_CLASS}"]')
             img_input = get_element(self.browser_handler, locator)
             img_input.send_keys(post_img_path)
             self.wait('nano')
-            
+
             locator = (By.CSS_SELECTOR, f'div[class="{POST_NEXT_BT}"]')
             next_bt = get_element(self.browser_handler, locator)
             next_bt.click()
             self.wait('nano')
             next_bt = get_element(self.browser_handler, locator)
             next_bt.click()
-            
+
             if post_txt:
                 locator = (By.CSS_SELECTOR, f'div[class="{POST_DESC_INPUT_CLASS}"]')
                 desc_input = get_element(self.browser_handler, locator)
                 desc_input.send_keys(post_txt)
-            
+
             locator = (By.CSS_SELECTOR, f'div[class="{POST_NEXT_BT}"]')
             upload_bt = get_element(self.browser_handler, locator)
             upload_bt.click()
@@ -1325,7 +1384,7 @@ class IgBot(Browser):
             except TimeoutException:
                 warning('Tiempo de espera para subir el post excedido')
                 self.check_challenge()
-            
+
             locator = (By.CSS_SELECTOR, 'svg[aria-label="Cerrar"]')
             close_bt = get_element(self.browser_handler, locator)
             close_bt.click()
@@ -1346,7 +1405,7 @@ class IgBot(Browser):
         """
             Metodo que hace comentario en un post dado por su url
         """
-        
+
         #prev_url = self.browser_handler.current_url
         self.browser_handler.get(post_url)
         self.wait('nano')
@@ -1376,7 +1435,7 @@ class IgBot(Browser):
                 self.comment_post(post_url, comment_txt)
 
         #self.browser_handler.get(prev_url)
-    
+
     def comment_post_list(self, post_url_list: list[str], comment_txt: str):
         """
             Metodo que hace un comentario a una lista de posts dados por su url
@@ -1384,39 +1443,44 @@ class IgBot(Browser):
         for post_url in post_url_list:
             self.comment_post(post_url, comment_txt)
 
-    def check_challenge(self) -> bool: 
+    def check_challenge(self) -> bool:
         """
             Metodo que verifica si instagram esta solicitando resolver un "desafio" o captcha para comprobar que no eres un bot
 
-            Se recomienda que despues de una sospecha por parte de ig la cantidad de cuentas a seguir o dejar de seguir y la cantidad de likes 
+            Se recomienda que despues de una sospecha por parte de ig la cantidad de cuentas a seguir o dejar de seguir y la cantidad de likes
             disminuya a la mitad o mas, de otro modo se corre el riesgo de otras penalizaciones como ban.
         """
         if 'challenge' in self.browser_handler.current_url:
             warning("Posible deteccion del bot: Se requiere verificacion por recaptcha")
             self.show_window()
             return True
-        
+
         return False
 
     def _check_login(self, admsg:str=''):
         if not self.is_logged:
             raise NoLoggedSession(admsg)
 #<------------------------------><------------------------------><------------------------------>
-    
+
 
 def main():
+    #vpn = UrbanVpn()
+    #vpn.init_browser_handler()
+    #vpn.init_page()
+        
     proton = ProtonMail(use_vpn=True)
 
     proton.init_browser_handler()
     proton.init_web()
     #proton.activate_vpn()
-    proton.register("ayahuasca3232", "987654321.")
+    #proton.register("ayahuasca3240", "987659821.")
+    print(proton.create_new_account())
     #bot = IgBot(use_vpn=True)
     #bot.set_username('darkm31')
     #bot.pwd = 'password'
-    
+
     #bot.init_ig()
-    
+
     #bot.create_new_account()
     #bot.close()
     #bot.register('andresbellowazaa@gmail.com', 'Tolonso', 'tolotet22', 'asd', '23/2/1997')
@@ -1431,7 +1495,7 @@ def main():
     #print(bot.follow_by_hashtag('#programacionvenezuela'))
     #time.sleep(1000)
 
-    #bot.close() 
+    #bot.close()
 
 if __name__ == "__main__":
     main()
