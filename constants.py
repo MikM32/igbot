@@ -38,6 +38,7 @@ PINBOX_OMIT = 'button w-full button-large button-outline-weak'
 PINBOX_CLASS = 'w-full shrink-0'
 PINBOX_MAIL_ITEM = 'item-container-wrapper relative'
 PINBOX_SUBJECT_SPAN = 'max-w-full text-ellipsis text-semibold'
+PNAME_NEXT = 'button w-full button-large button-solid-norm mt-6'
 
 #mensajes
 LOGIN_INCORRECT_PWD_MSG = 'Tu contraseña no es correcta'
