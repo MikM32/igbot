@@ -74,6 +74,15 @@ def display_window(wintitle:str, display:bool):
     else:
         EnumWindows(hide_callback, 0)
 
+def gen_name(self) -> str:
+    pass
+
+def gen_username(self) -> str:
+    pass
+
+def gen_password(self) -> str:
+    pass
+
 get_element = lambda bhandler, locator: WebDriverWait(bhandler, WAIT_MAX).until(EC.presence_of_element_located(locator))
 """
     funcion que espera 60 segundos a que un elemento cargue y luego lo retorna
@@ -570,7 +579,9 @@ class ProtonMail(Browser):
         inputs = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.visibility_of_any_elements_located(locator))
 
         inputs[0].send_keys(pwd)
+        self.wait('nano')
         inputs[1].send_keys(pwd)
+        self.wait('nano')
 
         locator = (By.CSS_SELECTOR, f'button[type="submit"]')
         submit_bt = get_element(self.browser_handler, locator)
