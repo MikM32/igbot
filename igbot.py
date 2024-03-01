@@ -501,7 +501,7 @@ class UrbanVpn(Browser):
             locator = (By.CLASS_NAME, 'loader loader--animated primary-layout__loader')
             WebDriverWait(self.browser_handler, WAIT_MAX).until_not(EC.presence_of_element_located(locator))
             self.__is_active = True
-            self.wait('nano')
+            self.wait('micro')
             #print('listo')
         except TimeoutException as e:
             warning('No se encontraron elementos necesarios para activar el vpn')
@@ -893,11 +893,6 @@ class IgBot(Browser):
         birth_date = birth.split('/')
         if(len(birth_date) < 3):
             raise RegisterInvalidBirthdate()
-        
-        mail_bot = ProtonMail(use_vpn=True)
-        mail_bot.init_browser_handler()
-        mail_bot.init_web()
-        mail_bot.register(email, pwd)
 
         warning('Esperando a que el correo madure: 1 min.')
         time.sleep(60)
@@ -905,6 +900,13 @@ class IgBot(Browser):
         if self.use_vpn:
             self._init_vpn()
             self.activate_vpn()
+
+
+        mail_bot = ProtonMail(use_vpn=True)
+        mail_bot.init_browser_handler()
+        mail_bot.init_web()
+        mail_bot.register(email, pwd)
+
         self.browser_handler.get(IG_REGISTRATION_URL)
 
         try:
