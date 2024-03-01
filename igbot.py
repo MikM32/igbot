@@ -481,7 +481,7 @@ class UrbanVpn(Browser):
             countries_list = get_elements(self.browser_handler, c_locator)
 
             curelement = None
-            country = secrets.choice(['United States (USA)', 'Australia', 'Belgium', 'Canada', 'France', 'Germany', 'United Kingdom'])
+            country = secrets.choice(['United States (USA)','United Kingdom']) #'Australia', 'Canada', 'Germany', ])
             for element in countries_list:
                 self.browser_handler.execute_script("arguments[0].scrollIntoView();", element)
                 #print(element.text)
@@ -631,21 +631,27 @@ class ProtonMail(Browser):
             except:
                  print('listo')
                  break
-            
+        
+        self.wait('nano')
 
         try:
             locator = (By.CSS_SELECTOR, f'button[class="{PNAME_NEXT}"]')
             next_bt2 = get_element(self.browser_handler, locator)
             next_bt2.click()
 
+            self.wait('micro')
+
             locator = (By.XPATH, "//button[contains(text(), 'tarde')]")
             omit_bt = get_element(self.browser_handler, locator)
             omit_bt.click()
+
+            self.wait('micro')
 
             locator = (By.XPATH, "//button[contains(text(), 'Confirmar')]")
             omit_bt = get_element(self.browser_handler, locator)
             omit_bt.click()
 
+            self.wait('micro')
             locator = (By.XPATH, "//button[contains(text(), 'Siguiente')]")
             omit_bt = get_element(self.browser_handler, locator)
             omit_bt.click()
@@ -653,6 +659,8 @@ class ProtonMail(Browser):
             #locator = (By.XPATH, "//button[contains(text(), 'siguiente')]")
             #omit_bt = get_element(self.browser_handler, locator)
             omit_bt.click()
+
+            self.wait('micro')
 
             locator = (By.XPATH, "//button[contains(text(), 'Omitir')]")
             omit_bt = get_element(self.browser_handler, locator)
@@ -676,6 +684,7 @@ class ProtonMail(Browser):
         
         locator = (By.CSS_SELECTOR, 'svg[data-testid="navigation-link:refresh-folder"]')
         refresh_bt = get_element(self.browser_handler, locator)
+        self.wait('nano')
         refresh_bt.click()
 
         locator = (By.CLASS_NAME, 'inline-block max-w-full mr-1 text-ellipsis')
@@ -945,20 +954,27 @@ class IgBot(Browser):
                 cur_opt.click()
                 self.wait('nano')
 
-
-
-            locator = (By.CSS_SELECTOR, f'button[class="{REG_NEXT_BT}"]')
-            next_bt = get_element(self.browser_handler, locator)
-
-            next_bt.click()
-            self.wait('nano')
+            self.wait('micro')
 
             mail_bot = ProtonMail(use_vpn=True)
             mail_bot.init_browser_handler()
             mail_bot.init_web()
             mail_bot.register(email, pwd)
 
+            locator = (By.CSS_SELECTOR, f'button[class="{REG_NEXT_BT}"]')
+            next_bt = get_element(self.browser_handler, locator)
+            next_bt.click()
+            
+
             self.wait('micro')
+
+            while True:
+                try:
+                    self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'aptcha')]")
+                    self.show_window()
+                except:
+                    break
+
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
 
