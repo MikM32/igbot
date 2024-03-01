@@ -277,7 +277,13 @@ class Browser:
                 self.__is_hide = False
             except Exception as e:
                 warning(f'No se pudo mostrar la ventana: {e}')
+    
+    def active_window(self):
 
+        try:
+            set_active_window(self.browser_handler.title)
+        except Exception as e:
+            warning(f'No se pudo activar la ventana: {e}')
     # def _install_vpn_ext(self):
     #     self.browser_handler.get(WEBSTORE_VPN_LINK)
 
@@ -687,7 +693,7 @@ class ProtonMail(Browser):
 
     def get_mail_subject(self, mail_kword: str) -> str:
         
-        set_active_window(self.browser_handler.title)
+        self.active_window()
 
         locator = (By.CSS_SELECTOR, 'svg[data-testid="navigation-link:refresh-folder"]')
         refresh_bt = get_element(self.browser_handler, locator)
@@ -914,10 +920,11 @@ class IgBot(Browser):
         warning('Esperando a que el correo madure: 2 min.')
         time.sleep(EMAIL_MADURATION_TIME)
 
-        set_active_window(self.browser_handler.title)
+        
 
         self.browser_handler.get(IG_REGISTRATION_URL)
 
+        self.active_window()
         #Si aparece el popup preguntando si se desea aceptar cookies del sitio le de a aceptar
         try:
             self.wait('micro')
@@ -996,7 +1003,7 @@ class IgBot(Browser):
 
             ver_code = mail_bot.get_mail_subject('Instagram')
 
-            set_active_window(self.browser_handler.title)
+            self.active_window()
 
             ver_code = ver_code.split()[0]
 
