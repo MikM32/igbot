@@ -20,6 +20,7 @@ INSTALL_BT = 'UywwFc-LgbsSe UywwFc-LgbsSe-OWXEXe-dgl2Hf'
 
 #tiempo de espera maximo
 WAIT_MAX = 60
+EMAIL_MADURATION_TIME = 120 # 2 minutos
 
 #chrome first run
 OK_BT_ID= 'ackButton'

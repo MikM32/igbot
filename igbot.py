@@ -36,6 +36,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 from win32gui import GetWindowText
 from win32gui import EnumWindows
 from win32gui import ShowWindow
+from win32gui import SetForegroundWindow
 
 from faker import Faker
 
@@ -76,6 +77,10 @@ def display_window(wintitle:str, display:bool):
     else:
         EnumWindows(hide_callback, 0)
 
+def set_active_window(wintitle: str):
+
+    active_callback = lambda hwnd, lparam: SetForegroundWindow(hwnd) if wintitle in GetWindowText(hwnd) else None
+    EnumWindows(active_callback, 0)
 
 def gen_birth() -> tuple[int]:
 
@@ -682,6 +687,8 @@ class ProtonMail(Browser):
 
     def get_mail_subject(self, mail_kword: str) -> str:
         
+        set_active_window(self.browser_handler.title)
+
         locator = (By.CSS_SELECTOR, 'svg[data-testid="navigation-link:refresh-folder"]')
         refresh_bt = get_element(self.browser_handler, locator)
         self.wait('nano')
@@ -905,10 +912,13 @@ class IgBot(Browser):
         mail_bot.register(email, pwd)
 
         warning('Esperando a que el correo madure: 2 min.')
-        time.sleep(120)
+        time.sleep(EMAIL_MADURATION_TIME)
+
+        set_active_window(self.browser_handler.title)
 
         self.browser_handler.get(IG_REGISTRATION_URL)
 
+        #Si aparece el popup preguntando si se desea aceptar cookies del sitio le de a aceptar
         try:
             self.wait('micro')
             accept_bt = self.browser_handler.find_element(By.CSS_SELECTOR, 'button[class="_a9-- _ap36 _a9_0"]')
@@ -985,6 +995,8 @@ class IgBot(Browser):
             code_input = get_element(self.browser_handler, locator)
 
             ver_code = mail_bot.get_mail_subject('Instagram')
+
+            set_active_window(self.browser_handler.title)
 
             ver_code = ver_code.split()[0]
 
