@@ -894,9 +894,6 @@ class IgBot(Browser):
         if(len(birth_date) < 3):
             raise RegisterInvalidBirthdate()
 
-        warning('Esperando a que el correo madure: 1 min.')
-        time.sleep(120)
-        
         if self.use_vpn:
             self._init_vpn()
             self.activate_vpn()
@@ -906,6 +903,9 @@ class IgBot(Browser):
         mail_bot.init_browser_handler()
         mail_bot.init_web()
         mail_bot.register(email, pwd)
+
+        warning('Esperando a que el correo madure: 2 min.')
+        time.sleep(120)
 
         self.browser_handler.get(IG_REGISTRATION_URL)
 
