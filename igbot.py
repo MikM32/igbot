@@ -893,7 +893,15 @@ class IgBot(Browser):
         birth_date = birth.split('/')
         if(len(birth_date) < 3):
             raise RegisterInvalidBirthdate()
+        
+        mail_bot = ProtonMail(use_vpn=True)
+        mail_bot.init_browser_handler()
+        mail_bot.init_web()
+        mail_bot.register(email, pwd)
 
+        warning('Esperando a que el correo madure: 1 min.')
+        time.sleep(60)
+        
         if self.use_vpn:
             self._init_vpn()
             self.activate_vpn()
@@ -911,10 +919,10 @@ class IgBot(Browser):
             inputs = get_elements(self.browser_handler, (By.TAG_NAME, 'input'))
 
             inputs[0].send_keys(email+"@proton.me")
-            self.wait('nano')
+            self.wait('micro')
             #comprobar validez
             inputs[1].send_keys(name)
-            self.wait('nano')
+            self.wait('micro')
             #comprobar validez
             locator = (By.CSS_SELECTOR, f'button[class="{GEN_USER_BT}"]')
             gen_user = get_clickable_element(self.browser_handler, locator)
@@ -922,7 +930,7 @@ class IgBot(Browser):
             #inputs[2].send_keys(username)
             #comprobar validez
             inputs[3].send_keys(pwd)
-            self.wait('nano')
+            self.wait('micro')
             #comprobar validez
 
             inputs[3].send_keys(Keys.ENTER)
@@ -952,19 +960,13 @@ class IgBot(Browser):
 
                 self.browser_handler.execute_script('arguments[0].scrollIntoView();', cur_opt)
                 cur_opt.click()
-                self.wait('nano')
+                self.wait('micro')
 
             self.wait('micro')
-
-            mail_bot = ProtonMail(use_vpn=True)
-            mail_bot.init_browser_handler()
-            mail_bot.init_web()
-            mail_bot.register(email, pwd)
 
             locator = (By.CSS_SELECTOR, f'button[class="{REG_NEXT_BT}"]')
             next_bt = get_element(self.browser_handler, locator)
             next_bt.click()
-            
 
             self.wait('micro')
 
@@ -990,6 +992,7 @@ class IgBot(Browser):
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_ACTIVE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
             code_input.send_keys(ver_code)
+            self.wait('micro')
             code_input.send_keys(Keys.ENTER)
 
             #Aqui deberia llamar algun metodo que revise el correo en busqueda de correo de verificacion y que lo retorne
