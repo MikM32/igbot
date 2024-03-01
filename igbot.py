@@ -82,6 +82,18 @@ def set_active_window(wintitle: str):
     active_callback = lambda hwnd, lparam: SetForegroundWindow(hwnd) if wintitle in GetWindowText(hwnd) else None
     EnumWindows(active_callback, 0)
 
+def clean_name(name:str) -> str:
+
+    accents = {'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u'}
+    res = name.replace(' ', '')
+    for accent in accents.keys():
+        for i in range(len(res)):
+            try:
+                res[i] = accents[res[i]]
+            except:
+                pass
+    return res
+
 def gen_birth() -> tuple[int]:
 
     faker = Faker(['es_MX'])
@@ -93,18 +105,17 @@ def gen_birth() -> tuple[int]:
 def gen_name() -> str:
     faker = Faker(['es_MX'])
 
-    return faker.first_name()
+    return clean_name(faker.first_name())
 
 def gen_email() -> str:
     faker = Faker(['es_MX'])
 
-    return chr(secrets.randbelow(20)+97) + faker.last_name().lower() + str(secrets.randbelow(200))
+    return chr(secrets.randbelow(20)+97) + clean_name(faker.last_name().lower()) + str(secrets.randbelow(200))
 
 def gen_pwd() -> str:
     #faker = Faker(['es_MX'])
 
     return secrets.token_hex(8)
-
 
 get_element = lambda bhandler, locator: WebDriverWait(bhandler, WAIT_MAX).until(EC.presence_of_element_located(locator))
 """
