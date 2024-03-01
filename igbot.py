@@ -926,7 +926,7 @@ class IgBot(Browser):
         except:
             pass
 
-
+        self.wait()
         try:
             inputs = get_elements(self.browser_handler, (By.TAG_NAME, 'input'))
 
