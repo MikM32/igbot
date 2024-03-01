@@ -88,10 +88,8 @@ def clean_name(name:str) -> str:
     res = name.replace(' ', '')
     for accent in accents.keys():
         for i in range(len(res)):
-            try:
-                res[i] = accents[res[i]]
-            except:
-                pass
+            if res[i] == accent:
+                res[i] = accents[accent]
     return res
 
 def gen_birth() -> tuple[int]:
@@ -641,12 +639,16 @@ class ProtonMail(Browser):
 
         self.browser_handler.switch_to.default_content()
 
-        locator = (By.TAG_NAME, 'input')
-        inputs = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.visibility_of_any_elements_located(locator))
+        locator = (By.ID, PREG_PWD_INPUT_ID)
+        pwd_input = get_element(self.browser_handler, locator)
 
-        inputs[0].send_keys(pwd)
-        self.wait('nano')
-        inputs[1].send_keys(pwd)
+        pwd_input.send_keys(pwd)
+        self.wait('micro')
+
+        locator = (By.ID, PREG_CONFIRM_PWD_ID)
+        pwd_conf_input = get_element(self.browser_handler, locator)
+
+        pwd_conf_input.send_keys(pwd)
         self.wait('nano')
 
         locator = (By.CSS_SELECTOR, f'button[type="submit"]')
@@ -717,10 +719,10 @@ class ProtonMail(Browser):
     def get_mail_subject(self, mail_kword: str) -> str:
         
         #self.active_window()
-
+        self.wait()
         locator = (By.CSS_SELECTOR, 'svg[data-testid="navigation-link:refresh-folder"]')
         refresh_bt = get_element(self.browser_handler, locator)
-        self.wait('nano')
+        self.wait('micro')
         refresh_bt.click()
 
         locator = (By.CLASS_NAME, 'inline-block max-w-full mr-1 text-ellipsis')
@@ -846,14 +848,22 @@ class IgBot(Browser):
                     warning(f'Error al cargar cookies de sesion para {self.username}: {e}')
                     self.is_logged = False
             else:
-                raise IgUsernameNotFound()
+                warning(IgUsernameNotFound().msg)
+                #raise IgUsernameNotFound()
 
         self.browser_handler.get(IG_URL)
+        #Si aparece el popup preguntando si se desea aceptar cookies del sitio le de a aceptar
+        try:
+            self.wait('micro')
+            accept_bt = self.browser_handler.find_element(By.CSS_SELECTOR, 'button[class="_a9-- _ap36 _a9_0"]')
+            accept_bt.click()
+        except:
+            pass
         self.whandle = self.browser_handler.current_window_handle
         self.__is_in_page = True
 
-        if not self.is_logged:
-            self.login(True, False)
+        #if not self.is_logged:
+        #    self.login(True, False)
 
     def accept_notifications(self, accept: bool):
         """
@@ -1029,22 +1039,22 @@ class IgBot(Browser):
             
             time.sleep(50)
 
-            locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_INPUT}"]')
-            code_input = get_element(self.browser_handler, locator)
+            
 
             prev_handle = self.browser_handler.current_window_handle
-            self.browser_handler.switch_to.window('proton')
+            self.browser_handler.switch_to.window(mail_bot.whandle)
             ver_code = mail_bot.get_mail_subject('Instagram')
             self.browser_handler.switch_to.window(prev_handle)
             #self.active_window()
 
             ver_code = ver_code.split()[0]
+            print(ver_code)
 
-
+            locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_INPUT}"]')
+            code_input = get_element(self.browser_handler, locator)
             code_input.click()
 
             
-
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_ACTIVE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
             code_input.send_keys(ver_code)
@@ -1055,8 +1065,7 @@ class IgBot(Browser):
             
 
         except Exception as e:
-            warning('No se puede registrar una nueva cuenta porque no se encontraron algunos elementos')
-            print(repr(e))
+            warning(f'No se puede registrar una nueva cuenta porque no se encontraron algunos elementos\n{e}')
             if self.check_challenge():
                 while 'challenge' in self.browser_handler.current_url:
                     warning('Se debe resolver el captcha para poder continuar.')
