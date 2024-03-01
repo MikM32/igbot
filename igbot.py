@@ -895,7 +895,7 @@ class IgBot(Browser):
             raise RegisterInvalidBirthdate()
 
         warning('Esperando a que el correo madure: 1 min.')
-        time.sleep(60)
+        time.sleep(120)
         
         if self.use_vpn:
             self._init_vpn()
@@ -921,10 +921,10 @@ class IgBot(Browser):
             inputs = get_elements(self.browser_handler, (By.TAG_NAME, 'input'))
 
             inputs[0].send_keys(email+"@proton.me")
-            self.wait('micro')
+            self.wait('small')
             #comprobar validez
             inputs[1].send_keys(name)
-            self.wait('micro')
+            self.wait('small')
             #comprobar validez
             locator = (By.CSS_SELECTOR, f'button[class="{GEN_USER_BT}"]')
             gen_user = get_clickable_element(self.browser_handler, locator)
@@ -932,7 +932,7 @@ class IgBot(Browser):
             #inputs[2].send_keys(username)
             #comprobar validez
             inputs[3].send_keys(pwd)
-            self.wait('micro')
+            self.wait('small')
             #comprobar validez
 
             inputs[3].send_keys(Keys.ENTER)
@@ -978,6 +978,8 @@ class IgBot(Browser):
                     self.show_window()
                 except:
                     break
+            
+            time.sleep(50)
 
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
