@@ -84,13 +84,10 @@ def set_active_window(wintitle: str):
 
 def clean_name(name:str) -> str:
 
-    accents = {'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u'}
-    res = name.replace(' ', '')
+    accents = {' ':'','ñ':'n' ,'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u'}
+    res = name
     for accent in accents.keys():
-        for i in range(len(res)):
-            if res[i] == accent:
-                res = res.replace(accent, accents[accent])
-                break
+        res = res.replace(accent, accents[accent])
     return res
 
 def gen_birth() -> tuple[int]:
