@@ -480,9 +480,18 @@ class UrbanVpn(Browser):
             #countries_list =  WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(c_locator))
             countries_list = get_elements(self.browser_handler, c_locator)
 
-            index = secrets.randbelow(len(countries_list))
-            self.browser_handler.execute_script("arguments[0].scrollIntoView();", countries_list[index])
-            countries_list[index].click()
+            curelement = None
+            country = secrets.choice(['United States (USA)', 'Australia', 'Belgium', 'Canada', 'France', 'Germany', 'United Kingdom'])
+            for element in countries_list:
+                self.browser_handler.execute_script("arguments[0].scrollIntoView();", element)
+                #print(element.text)
+                if country in element.text:
+                    curelement = element
+                    break
+            #index = secrets.randbelow(len(countries_list))
+            #self.browser_handler.execute_script("arguments[0].scrollIntoView();", curelement)#countries_list[index])
+            #countries_list[index].click()
+            curelement.click()
 
             #run_button = self.browser_handler.find_element(By.CLASS_NAME, 'play-button--play')
             #run_button.click()
@@ -611,15 +620,16 @@ class ProtonMail(Browser):
 
         submit_bt.click()
 
+
         #resolver captcha
-        #locator = (By.XPATH, "//h1[contains(text(), 'Verifica')]")
-        #get_element(self.browser_handler, locator)
+        locator = (By.XPATH, "//h1[contains(text(), 'Verifica')]")
+        get_element(self.browser_handler, locator)
         while True:
             try:
-                 self.browser_handler.find_element(By.XPATH, "//h1[contains(text(), 'Verifica')]")
+                 self.browser_handler.find_element(By.XPATH, "//span[contains(text(), 'CAPTCHA')]")
                  self.wait('micro')
-                 continue
             except:
+                 print('listo')
                  break
             
 
@@ -639,14 +649,17 @@ class ProtonMail(Browser):
             locator = (By.XPATH, "//button[contains(text(), 'Siguiente')]")
             omit_bt = get_element(self.browser_handler, locator)
             omit_bt.click()
-            locator = (By.XPATH, "//button[contains(text(), 'siguiente')]")
-            omit_bt = get_element(self.browser_handler, locator)
+
+            #locator = (By.XPATH, "//button[contains(text(), 'siguiente')]")
+            #omit_bt = get_element(self.browser_handler, locator)
             omit_bt.click()
+
             locator = (By.XPATH, "//button[contains(text(), 'Omitir')]")
             omit_bt = get_element(self.browser_handler, locator)
             omit_bt.click()
-        except:
+        except TimeoutException as e:
             warning('algunos elementos no se pudieron cargar')
+            warning(repr(e))
         
         return email, pwd
 
@@ -659,8 +672,20 @@ class ProtonMail(Browser):
     def login(self):
         pass
 
-    def get_mail_content(self) -> str:
-        pass
+    def get_mail_subject(self, mail_kword: str) -> str:
+        
+        locator = (By.CSS_SELECTOR, 'svg[data-testid="navigation-link:refresh-folder"]')
+        refresh_bt = get_element(self.browser_handler, locator)
+        refresh_bt.click()
+
+        locator = (By.CLASS_NAME, 'inline-block max-w-full mr-1 text-ellipsis')
+        subjects = get_elements(self.browser_handler, locator)
+
+        for subject in subjects:
+            if mail_kword in subject.text:
+                return subject.text
+        
+        return None
 
     def close(self):
         if self.use_vpn:
@@ -860,18 +885,35 @@ class IgBot(Browser):
         if(len(birth_date) < 3):
             raise RegisterInvalidBirthdate()
 
-
+        if self.use_vpn:
+            self._init_vpn()
+            self.activate_vpn()
         self.browser_handler.get(IG_REGISTRATION_URL)
+
+        try:
+            self.wait('micro')
+            accept_bt = self.browser_handler.find_element(By.CSS_SELECTOR, 'button[class="_a9-- _ap36 _a9_0"]')
+            accept_bt.click()
+        except:
+            pass
+
+
         try:
             inputs = get_elements(self.browser_handler, (By.TAG_NAME, 'input'))
 
-            inputs[0].send_keys(email)
+            inputs[0].send_keys(email+"@proton.me")
+            self.wait('nano')
             #comprobar validez
             inputs[1].send_keys(name)
+            self.wait('nano')
             #comprobar validez
-            inputs[2].send_keys(username)
+            locator = (By.CSS_SELECTOR, f'button[class="{GEN_USER_BT}"]')
+            gen_user = get_clickable_element(self.browser_handler, locator)
+            gen_user.click()
+            #inputs[2].send_keys(username)
             #comprobar validez
             inputs[3].send_keys(pwd)
+            self.wait('nano')
             #comprobar validez
 
             inputs[3].send_keys(Keys.ENTER)
@@ -901,6 +943,7 @@ class IgBot(Browser):
 
                 self.browser_handler.execute_script('arguments[0].scrollIntoView();', cur_opt)
                 cur_opt.click()
+                self.wait('nano')
 
 
 
@@ -908,18 +951,37 @@ class IgBot(Browser):
             next_bt = get_element(self.browser_handler, locator)
 
             next_bt.click()
+            self.wait('nano')
 
+            mail_bot = ProtonMail(use_vpn=True)
+            mail_bot.init_browser_handler()
+            mail_bot.init_web()
+            mail_bot.register(email, pwd)
+
+            self.wait('micro')
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
+
+            ver_code = mail_bot.get_mail_subject('Instagram')
+
+            ver_code = ver_code.split()[0]
+
+
             code_input.click()
+
+            
 
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_ACTIVE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
+            code_input.send_keys(ver_code)
+            code_input.send_keys(Keys.ENTER)
 
             #Aqui deberia llamar algun metodo que revise el correo en busqueda de correo de verificacion y que lo retorne
+            
 
-        except:
+        except Exception as e:
             warning('No se puede registrar una nueva cuenta porque no se encontraron algunos elementos')
+            print(repr(e))
             if self.check_challenge():
                 while 'challenge' in self.browser_handler.current_url:
                     warning('Se debe resolver el captcha para poder continuar.')
@@ -933,7 +995,7 @@ class IgBot(Browser):
         proton.init_browser_handler()
         proton.init_web()
         proton.activate_vpn()
-        data = proton.register('wazacaca1ss2', '12345678.')
+        data = proton.register(gen_email(), gen_pwd())
 
 
     def login(self, sv_cookies: bool=False, accept_nt: bool=False):
@@ -1470,22 +1532,23 @@ def main():
     #vpn.init_browser_handler()
     #vpn.init_page()
         
-    proton = ProtonMail(use_vpn=True)
+    #proton = ProtonMail(use_vpn=True)
 
-    proton.init_browser_handler()
-    proton.init_web()
+    #proton.init_browser_handler()
+    #proton.init_web()
     #proton.activate_vpn()
     #proton.register("ayahuasca3240", "987659821.")
-    print(proton.create_new_account())
-    #bot = IgBot(use_vpn=True)
+    #print(proton.create_new_account())
+    bot = IgBot(use_vpn=True)
     #bot.set_username('darkm31')
     #bot.pwd = 'password'
 
+    bot.init_browser_handler()
     #bot.init_ig()
 
     #bot.create_new_account()
     #bot.close()
-    #bot.register('andresbellowazaa@gmail.com', 'Tolonso', 'tolotet22', 'asd', '23/2/1997')
+    bot.register(gen_email(), gen_name(), 'wasridss2', gen_pwd(), '11/8/1998')
     #bot.wait('micro')
     #bot.show_window()
     #bot.accept_notifications(False)
