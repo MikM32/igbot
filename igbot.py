@@ -89,7 +89,8 @@ def clean_name(name:str) -> str:
     for accent in accents.keys():
         for i in range(len(res)):
             if res[i] == accent:
-                res[i] = accents[accent]
+                res = res.replace(accent, accents[accent])
+                break
     return res
 
 def gen_birth() -> tuple[int]:
