@@ -168,6 +168,7 @@ class Browser:
         self.def_browser = None
         self.is_headless = headless
         self.use_vpn = use_vpn
+        self.is_active_vpn = False
         self.__is_hide = False
         self.__first_run = False
 
@@ -435,6 +436,7 @@ class UrbanVpn(Browser):
         self.__is_in_page = False
         self.__is_active = False
         self.__first_use = True
+        self.whandle = ''
 
 
     def init_page(self):
@@ -448,6 +450,7 @@ class UrbanVpn(Browser):
             return
         WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.number_of_windows_to_be(3))
         current_handle = self.browser_handler.current_window_handle
+        self.whandle = current_handle
 
         for handle in self.browser_handler.window_handles[::-1]:
             if handle != current_handle:
@@ -544,7 +547,7 @@ class UrbanVpn(Browser):
 
     def switch_to_vpn(self):
 
-        self.browser_handler.switch_to.window(self.browser_handler.window_handles[::-1][0])
+        self.browser_handler.switch_to.window(self.whandle)
 
     def close(self):
         self.__is_in_page = False
@@ -566,6 +569,7 @@ class ProtonMail(Browser):
         self.username = username
         self.pwd = pwd
         self.vpn = None
+        self.whandle = ''
 
         super().__init__(browser_path, custom_b_handler, use_vpn, headless)
 
@@ -574,11 +578,14 @@ class ProtonMail(Browser):
         prev_handle = self.browser_handler.current_window_handle
         self.vpn.init_page()
         self.browser_handler.switch_to.window(prev_handle)
+        self.is_active_vpn = True
 
 
     def activate_vpn(self):
         if not self.vpn:
             raise IgBotNotInitializedVpn()
+        if self.is_active_vpn:
+            return
         prev_handle = self.browser_handler.current_window_handle
         self.vpn.switch_to_vpn()
         self.vpn.activate()
@@ -587,6 +594,8 @@ class ProtonMail(Browser):
     def deactivate_vpn(self):
         if not self.vpn:
             raise IgBotNotInitializedVpn()
+        if not self.is_active_vpn:
+            return
         prev_handle = self.browser_handler.current_window_handle
         self.vpn.switch_to_vpn()
         self.vpn.deactivate()
@@ -594,15 +603,18 @@ class ProtonMail(Browser):
 
     def init_web(self):
         if self.use_vpn:
-            self._init_vpn()
+            if not self.is_active_vpn:
+                self._init_vpn()
 
     def create_new_account(self) -> tuple[str]:
         
         return self.register(gen_email(), gen_pwd())
                              
     def register(self, email:str, pwd:str ) -> tuple[str]:
+        self.whandle = self.browser_handler.current_window_handle
         if self.use_vpn:
-            self.activate_vpn()
+            if not self.is_active_vpn:
+                self.activate_vpn()
         self.browser_handler.get(PROTONMAIL_REG_URL)
 
         # locator = (By.CSS_SELECTOR, f'input[class="{PREG_EMAIL_INPUT_ID}"]:nth-child(2)')
@@ -704,7 +716,7 @@ class ProtonMail(Browser):
 
     def get_mail_subject(self, mail_kword: str) -> str:
         
-        self.active_window()
+        #self.active_window()
 
         locator = (By.CSS_SELECTOR, 'svg[data-testid="navigation-link:refresh-folder"]')
         refresh_bt = get_element(self.browser_handler, locator)
@@ -785,6 +797,7 @@ class IgBot(Browser):
         prev_handle = self.browser_handler.current_window_handle
         self.vpn.init_page()
         self.browser_handler.switch_to.window(prev_handle)
+        self.is_active_vpn = True
 
         #self.wait('nano')
 
@@ -821,6 +834,7 @@ class IgBot(Browser):
             self.hide_window(inital_page=True)
         if self.use_vpn:
             self._init_vpn()
+            self.activate_vpn()
 
         self.browser_handler.implicitly_wait(5)
         if preload_cookies:
@@ -835,6 +849,7 @@ class IgBot(Browser):
                 raise IgUsernameNotFound()
 
         self.browser_handler.get(IG_URL)
+        self.whandle = self.browser_handler.current_window_handle
         self.__is_in_page = True
 
         if not self.is_logged:
@@ -905,8 +920,12 @@ class IgBot(Browser):
             self.save_cookies('instagram', self.username)
             self.wait('micro')
 
-    def register(self, email: str, name: str, username: str, pwd: str, birth: str):
+    def init_cfg(self):
+        if self.use_vpn:
+            self._init_vpn()
 
+    def register(self, email: str, name: str, username: str, pwd: str, birth: str):
+        
         try:
             self._check_login()
             warning('No se puede registrar una nueva cuenta porque hay una sesion activa.')
@@ -918,15 +937,14 @@ class IgBot(Browser):
         if(len(birth_date) < 3):
             raise RegisterInvalidBirthdate()
 
-        if self.use_vpn:
-            self._init_vpn()
-            self.activate_vpn()
 
-
-        mail_bot = ProtonMail(use_vpn=True)
-        mail_bot.init_browser_handler()
+        mail_bot = ProtonMail(custom_b_handler = self.browser_handler)
+        #mail_bot.init_browser_handler()
+        #prev_handle = 
+        self.browser_handler.switch_to.new_window('proton')
         mail_bot.init_web()
         mail_bot.register(email, pwd)
+        self.browser_handler.switch_to.window(self.whandle)
 
         warning('Esperando a que el correo madure: 2 min.')
         time.sleep(EMAIL_MADURATION_TIME)
@@ -935,7 +953,7 @@ class IgBot(Browser):
 
         self.browser_handler.get(IG_REGISTRATION_URL)
 
-        self.active_window()
+        
         #Si aparece el popup preguntando si se desea aceptar cookies del sitio le de a aceptar
         try:
             self.wait('micro')
@@ -943,6 +961,8 @@ class IgBot(Browser):
             accept_bt.click()
         except:
             pass
+
+        #self.active_window()
 
         self.wait()
         try:
@@ -1012,9 +1032,11 @@ class IgBot(Browser):
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
 
+            prev_handle = self.browser_handler.current_window_handle
+            self.browser_handler.switch_to.window('proton')
             ver_code = mail_bot.get_mail_subject('Instagram')
-
-            self.active_window()
+            self.browser_handler.switch_to.window(prev_handle)
+            #self.active_window()
 
             ver_code = ver_code.split()[0]
 
@@ -1601,6 +1623,8 @@ def main():
 
     #bot.create_new_account()
     #bot.close()
+    #bot.init_cfg()
+    bot.init_ig()
     bot.register(gen_email(), gen_name(), 'wasridss2', gen_pwd(), '11/8/1998')
     #bot.wait('micro')
     #bot.show_window()
