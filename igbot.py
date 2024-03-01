@@ -721,17 +721,20 @@ class ProtonMail(Browser):
         
         #self.active_window()
         self.wait()
-        locator = (By.CSS_SELECTOR, 'svg[data-testid="navigation-link:refresh-folder"]')
-        refresh_bt = get_element(self.browser_handler, locator)
-        self.wait('micro')
-        refresh_bt.click()
+        try:
+            locator = (By.CSS_SELECTOR, 'svg[data-testid="navigation-link:refresh-folder"]')
+            refresh_bt = get_element(self.browser_handler, locator)
+            self.wait('micro')
+            refresh_bt.click()
 
-        locator = (By.CLASS_NAME, 'inline-block max-w-full mr-1 text-ellipsis')
-        subjects = get_elements(self.browser_handler, locator)
+            locator = (By.CSS_SELECTOR, 'span[role="heading"]')
+            subjects = get_elements(self.browser_handler, locator)
 
-        for subject in subjects:
-            if mail_kword in subject.text:
-                return subject.text
+            for subject in subjects:
+                if mail_kword in subject.text:
+                    return subject.text
+        except Exception as e:
+            warning(f'No se encontraron elementos necesarios para poder leer el correo: {e}')
         
         return None
 
