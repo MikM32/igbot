@@ -964,7 +964,7 @@ class IgBot(Browser):
 
         #self.active_window()
 
-        self.wait()
+        time.sleep(15)
         try:
             inputs = get_elements(self.browser_handler, (By.TAG_NAME, 'input'))
 
