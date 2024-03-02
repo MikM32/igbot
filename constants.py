@@ -26,7 +26,7 @@ USER_AGENTS = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KH
 
 #tiempo de espera maximo
 WAIT_MAX = 60
-EMAIL_MADURATION_TIME = 120 # 2 minutos
+EMAIL_MADURATION_TIME = 180 # 3 minutos
 
 #chrome first run
 OK_BT_ID= 'ackButton'

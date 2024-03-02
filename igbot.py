@@ -790,6 +790,7 @@ class IgBot(Browser):
         self.pwd = pwd
         self.vpn = None
         self.is_logged = False
+        self.__is_init = False
         self.__is_in_page = False
 
         super().__init__(browser_path, custom_b_handler, use_vpn, headless)
@@ -840,15 +841,11 @@ class IgBot(Browser):
 
     def init_ig(self, preload_cookies:bool = True):
         """
-            Metodo que inicializa el browser_handler(webdriver), vpn, carga las cookies de sesion e inicia la pagina principal de instagram
+            Metodo que carga las cookies de sesion (si se le especifica) e inicia la pagina principal de instagram
         """
-        self.init_browser_handler()
-        if self.is_headless:
-            self.hide_window(inital_page=True)
-        if self.use_vpn:
-            self._init_vpn()
-            self.activate_vpn()
-
+        if self.__is_init:
+            return
+        
         self.browser_handler.implicitly_wait(5)
         if preload_cookies:
             if self.username:
@@ -942,10 +939,20 @@ class IgBot(Browser):
             self.wait('micro')
 
     def init_cfg(self):
+        """
+            Metodo que inicializa el browser handler, oculta la ventana si se le indica y activa el vpn tambien si se le indica.
+        """
+        self.init_browser_handler()
+        if self.is_headless:
+            self.hide_window(inital_page=True)
         if self.use_vpn:
             self._init_vpn()
+            self.activate_vpn()
 
-    def register(self, email: str, name: str, username: str, pwd: str, birth: str) -> tuple:
+        self.__is_init = True
+        self.wait('nano')
+
+    def register(self, email: str, name: str, pwd: str, birth: str) -> tuple:
         
         try:
             self._check_login()
@@ -960,8 +967,6 @@ class IgBot(Browser):
 
 
         mail_bot = ProtonMail(custom_b_handler = self.browser_handler)
-        #mail_bot.init_browser_handler()
-        #prev_handle = 
         self.browser_handler.switch_to.new_window('proton')
         mail_bot.init_web()
         maildata = mail_bot.register(email, pwd)
@@ -969,7 +974,7 @@ class IgBot(Browser):
             raise MailCreationError()
         self.browser_handler.switch_to.window(self.whandle)
 
-        warning('Esperando a que el correo madure: 2 min.')
+        warning('Esperando a que el correo madure: 3 min.')
         time.sleep(EMAIL_MADURATION_TIME)
 
         
@@ -987,23 +992,24 @@ class IgBot(Browser):
 
         #self.active_window()
 
-        time.sleep(15)
+        time.sleep(7)
         try:
             inputs = get_elements(self.browser_handler, (By.TAG_NAME, 'input'))
 
             inputs[0].send_keys(email+"@proton.me")
-            self.wait()
+            self.wait('small')
             #comprobar validez
             inputs[1].send_keys(name)
-            self.wait()
+            self.wait('small')
             #comprobar validez
             locator = (By.CSS_SELECTOR, f'button[class="{GEN_USER_BT}"]')
             gen_user = get_clickable_element(self.browser_handler, locator)
             gen_user.click()
+            self.wait('small')
             #inputs[2].send_keys(username)
             #comprobar validez
             inputs[3].send_keys(pwd)
-            self.wait()
+            self.wait('small')
             #comprobar validez
 
             inputs[3].send_keys(Keys.ENTER)
@@ -1042,7 +1048,8 @@ class IgBot(Browser):
             next_bt.click()
 
             self.wait('micro')
-
+            
+            #verificacion de captcha
             while True:
                 try:
                     self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'aptcha')]")
@@ -1082,19 +1089,14 @@ class IgBot(Browser):
                 while 'challenge' in self.browser_handler.current_url:
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
-                self.register(email, name, username, pwd, birth)
+                self.register(email, name, pwd, birth)
         
         finally:
             return maildata
 
     def create_new_account(self) -> tuple[str]:
 
-        self.activate_vpn()
-        proton = ProtonMail(use_vpn=True)
-        proton.init_browser_handler()
-        proton.init_web()
-        proton.activate_vpn()
-        data = proton.register(gen_email(), gen_pwd())
+        return self.register(gen_email(), gen_name(), gen_pwd(), gen_birth())
 
 
     def login(self, sv_cookies: bool=False, accept_nt: bool=False):
@@ -1200,12 +1202,13 @@ class IgBot(Browser):
         except NoLoggedSession:
             warning('close(): no hay una sesion abierta')
             pass
-        prev_handle = self.browser_handler.current_window_handle
+        #prev_handle = self.browser_handler.current_window_handle
         self.vpn.switch_to_vpn()
         self.vpn.deactivate()
         self.vpn.close()
-        self.browser_handler.switch_to.window(prev_handle)
+        self.browser_handler.switch_to.window(self.whandle)
         self.close_browser_handler()
+        self.__is_init = False
 
     def open_followers_list(self):
         self._check_login()
