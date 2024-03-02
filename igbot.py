@@ -90,13 +90,13 @@ def clean_name(name:str) -> str:
         res = res.replace(accent, accents[accent])
     return res
 
-def gen_birth() -> tuple[int]:
+def gen_birth() -> str:
 
     faker = Faker(['es_MX'])
     date = faker.date_of_birth(minimum_age=19, maximum_age=30)
     
 
-    return date.day, date.month, date.year
+    return f'{str(date.day)}/{str(date.month)}/{str(date.year)}'
 
 def gen_name() -> str:
     faker = Faker(['es_MX'])
@@ -1638,7 +1638,7 @@ def main():
     #bot.close()
     #bot.init_cfg()
     bot.init_ig()
-    bot.register(gen_email(), gen_name(), 'wasridss2', gen_pwd(), '11/8/1998')
+    bot.register(gen_email(), gen_name(), 'wasridss2', gen_pwd(), gen_birth())
     #bot.wait('micro')
     #bot.show_window()
     #bot.accept_notifications(False)
