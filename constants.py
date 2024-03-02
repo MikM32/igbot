@@ -19,8 +19,6 @@ WEBSTORE_VPN_LINK = 'https://chromewebstore.google.com/detail/urban-vpn-proxy/ep
 INSTALL_BT = 'UywwFc-LgbsSe UywwFc-LgbsSe-OWXEXe-dgl2Hf'
 
 USER_AGENTS = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.70 Safari/537.36',
-               'Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.90 Safari/537.36',
-               'Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.178 Safari/537.36',
                'Mozilla/5.0 (Linux; Android 14; SM-G960U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.90 Mobile Safari/537.36',
                'Mozilla/5.0 (Linux; Android 14; LM-Q710(FGN)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.90 Mobile Safari/537.36',
                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5825.205 Safari/537.36 OPR/99.0.3896.100',
@@ -34,7 +32,7 @@ EMAIL_MADURATION_TIME = 120 # 2 minutos
 OK_BT_ID= 'ackButton'
 
 #Protonmail
-PROTONMAIL_REG_URL = 'https://account.proton.me/es/mail/signup?plan=free&billing=12&minimumCycle=12&currency=EUR&ref=prctbl'
+PROTONMAIL_REG_URL = 'https://account.proton.me/es/mail/signup?plan=free&billing=12&minimumCycle=12&currency=USD&ref=prctbl'
 PREG_EMAIL_INPUT_ID = 'email'
 PREG_PWD_INPUT_ID = 'password'
 PREG_CONFIRM_PWD_ID = 'repeat-password'

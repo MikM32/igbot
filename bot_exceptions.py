@@ -100,5 +100,10 @@ class IgBotNotInitializedVpn(Exception):
         self.msg = 'No se ha inicializado el atributo: IgBot.vpn'
         super().__init__(self.msg)
 
+class MailCreationError(Exception):
+    def __init__(self):
+        self.msg = 'No se ha podido crear correctamente el correo'
+        super().__init__(self.msg)
+
 def warning(msg:str):
     print(f"Advertencia!: {msg}")
