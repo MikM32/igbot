@@ -505,7 +505,7 @@ class UrbanVpn(Browser):
             countries_list = get_elements(self.browser_handler, c_locator)
 
             curelement = None
-            country = secrets.choice(['United States (USA)','Canada']) #'Australia', 'Canada', 'United Kingdom', ])
+            country = secrets.choice(['United States (USA)','United Kingdom']) #'Australia', 'Canada', 'Germany', ])
             for element in countries_list:
                 self.browser_handler.execute_script("arguments[0].scrollIntoView();", element)
                 #print(element.text)
