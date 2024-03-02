@@ -225,6 +225,8 @@ class Browser:
 
         #user_path = os.environ['userprofile']
         #if self._check_profile_exists(user_path, 'IgbotData'):
+        random_user_agent = secrets.choice(USER_AGENTS)
+        self.options.add_argument(f"--user-agent={random_user_agent}")
         self.options.add_argument(f'--profile-directory=Default')
         #else:
         #    self.options.add_argument(f'--args')
@@ -249,6 +251,7 @@ class Browser:
             self.service = CService(ChromeDriverManager(driver_version=current_version, cache_manager=cache_manager).install())
 
         else:
+            self._patch_chromedriver()
             self.service = CService(executable_path=self.webdriver_path)
         self.browser_handler = webdriver.Chrome(options=self.options, service=self.service)
 
@@ -502,7 +505,7 @@ class UrbanVpn(Browser):
             countries_list = get_elements(self.browser_handler, c_locator)
 
             curelement = None
-            country = secrets.choice(['United States (USA)','United Kingdom']) #'Australia', 'Canada', 'Germany', ])
+            country = secrets.choice(['United States (USA)','Canada']) #'Australia', 'Canada', 'United Kingdom', ])
             for element in countries_list:
                 self.browser_handler.execute_script("arguments[0].scrollIntoView();", element)
                 #print(element.text)
