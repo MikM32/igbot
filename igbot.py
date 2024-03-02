@@ -225,8 +225,8 @@ class Browser:
 
         #user_path = os.environ['userprofile']
         #if self._check_profile_exists(user_path, 'IgbotData'):
-        random_user_agent = secrets.choice(USER_AGENTS)
-        self.options.add_argument(f"--user-agent={random_user_agent}")
+        #random_user_agent = secrets.choice(USER_AGENTS)
+        #self.options.add_argument(f"--user-agent={random_user_agent}")
         self.options.add_argument(f'--profile-directory=Default')
         #else:
         #    self.options.add_argument(f'--args')
