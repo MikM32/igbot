@@ -1,13 +1,15 @@
 # IgBot
 
-**Estado del bot:** *_En desarrollo._*
+**Estado del bot:** *_Pre-release._*
+
+**_Version_: 1.0.85** 
 
 **Funciones de la api:**
 - Iniciar sesión con una cuenta de instagram. :white_check_mark:
 - Función para seguir una cantidad de cuentas determinada. :white_check_mark:
 - Obtener cantidad de seguidores actual. :white_check_mark:
 - Función para dejar de seguir cuentas (previamente seguidas por medio del metodo follow_by_hashtag()) en un plazo de tiempo dado. :white_check_mark:
-- Crear una cuenta de instagram. :x:
+- Crear una cuenta de instagram. :white_check_mark:
 - Subir posts a una cuenta. :white_check_mark:
 
 **Nota:**
