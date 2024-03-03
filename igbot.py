@@ -676,41 +676,41 @@ class ProtonMail(Browser):
         
         self.wait('micro')
 
-        try:
-            locator = (By.CSS_SELECTOR, f'button[class="{PNAME_NEXT}"]')
-            next_bt2 = get_element(self.browser_handler, locator)
-            next_bt2.click()
+        # try:
+        locator = (By.CSS_SELECTOR, f'button[class="{PNAME_NEXT}"]')
+        next_bt2 = get_element(self.browser_handler, locator)
+        next_bt2.click()
 
-            self.wait('small')
+        self.wait('small')
 
-            locator = (By.XPATH, "//button[contains(text(), 'tarde')]")
-            omit_bt = get_element(self.browser_handler, locator)
-            omit_bt.click()
+        locator = (By.XPATH, "//button[contains(text(), 'tarde')]")
+        omit_bt = get_element(self.browser_handler, locator)
+        omit_bt.click()
+        
+        self.wait('micro')
 
-            self.wait('micro')
+        locator = (By.XPATH, "//button[contains(text(), 'Confirmar')]")
+        omit_bt = get_element(self.browser_handler, locator)
+        omit_bt.click()
 
-            locator = (By.XPATH, "//button[contains(text(), 'Confirmar')]")
-            omit_bt = get_element(self.browser_handler, locator)
-            omit_bt.click()
+        self.wait('small')
+        locator = (By.XPATH, "//button[contains(text(), 'Siguiente')]")
+        omit_bt = get_element(self.browser_handler, locator)
+        omit_bt.click()
 
-            self.wait('small')
-            locator = (By.XPATH, "//button[contains(text(), 'Siguiente')]")
-            omit_bt = get_element(self.browser_handler, locator)
-            omit_bt.click()
+        #locator = (By.XPATH, "//button[contains(text(), 'siguiente')]")
+        #omit_bt = get_element(self.browser_handler, locator)
+        omit_bt.click()
 
-            #locator = (By.XPATH, "//button[contains(text(), 'siguiente')]")
-            #omit_bt = get_element(self.browser_handler, locator)
-            omit_bt.click()
+        self.wait('micro')
 
-            self.wait('micro')
-
-            locator = (By.XPATH, "//button[contains(text(), 'Omitir')]")
-            omit_bt = get_element(self.browser_handler, locator)
-            omit_bt.click()
-        except TimeoutException as e:
-            warning('algunos elementos no se pudieron cargar')
-            warning(repr(e))
-            return None
+        locator = (By.XPATH, "//button[contains(text(), 'Omitir')]")
+        omit_bt = get_element(self.browser_handler, locator)
+        omit_bt.click()
+        # except TimeoutException as e:
+        #     warning('algunos elementos no se pudieron cargar')
+        #     warning(repr(e))
+        #     return None
         
         return email, pwd
 
@@ -727,21 +727,21 @@ class ProtonMail(Browser):
         
         #self.active_window()
         self.wait()
-        try:
-            locator = (By.CSS_SELECTOR, 'svg[data-testid="navigation-link:refresh-folder"]')
-            refresh_bt = get_element(self.browser_handler, locator)
-            refresh_bt.click()
+        #try:
+        locator = (By.CSS_SELECTOR, 'svg[data-testid="navigation-link:refresh-folder"]')
+        refresh_bt = get_element(self.browser_handler, locator)
+        refresh_bt.click()
 
-            self.wait('small')
+        self.wait('small')
 
-            locator = (By.CSS_SELECTOR, 'span[role="heading"]')
-            subjects = get_elements(self.browser_handler, locator)
+        locator = (By.CSS_SELECTOR, 'span[role="heading"]')
+        subjects = get_elements(self.browser_handler, locator)
 
-            for subject in subjects:
-                if mail_kword in subject.text:
-                    return subject.text
-        except Exception as e:
-            warning(f'No se encontraron elementos necesarios para poder leer el correo: {e}')
+        for subject in subjects:
+            if mail_kword in subject.text:
+                return subject.text
+        # except Exception as e:
+        #     warning(f'No se encontraron elementos necesarios para poder leer el correo: {e}')
         
         return None
 
@@ -1060,7 +1060,6 @@ class IgBot(Browser):
             
             time.sleep(50)
 
-            
 
             prev_handle = self.browser_handler.current_window_handle
             self.browser_handler.switch_to.window(mail_bot.whandle)
@@ -1083,6 +1082,7 @@ class IgBot(Browser):
             code_input.send_keys(Keys.ENTER)
             
             print('cuenta creada con exito!')
+            return (True, maildata)
 
         except Exception as e:
             warning(f'No se puede registrar una nueva cuenta porque no se encontraron algunos elementos\n{str(e)}')
@@ -1090,10 +1090,8 @@ class IgBot(Browser):
                 while 'challenge' in self.browser_handler.current_url:
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
-            self.register(email, name, pwd, birth)
-        
-        finally:
-            return maildata
+                self.register(email, name, pwd, birth)
+            return (False, maildata)
 
     def create_new_account(self) -> tuple[str]:
 
