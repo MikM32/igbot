@@ -961,11 +961,13 @@ class IgBot(Browser):
         except:
             pass
         
-        birth_date = birth.split('/')
-        if(len(birth_date) < 3):
-            raise RegisterInvalidBirthdate()
-        
         try:
+            birth_date = birth.split('/')
+            if not birth_date:
+                raise Exception
+            if(len(birth_date) < 3):
+                raise RegisterInvalidBirthdate()
+        
             prev_handle = self.browser_handler.current_window_handle
             mail_bot = ProtonMail(custom_b_handler = self.browser_handler)
             self.browser_handler.switch_to.new_window('proton')
@@ -1054,12 +1056,12 @@ class IgBot(Browser):
             while True:
                 try:
                     self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'aptcha')]")
+                    warning('Debe resolver el captcha para poder continuar')
                     self.show_window()
                 except:
                     break
             
             time.sleep(50)
-
 
             prev_handle = self.browser_handler.current_window_handle
             self.browser_handler.switch_to.window(mail_bot.whandle)
