@@ -965,14 +965,14 @@ class IgBot(Browser):
         if(len(birth_date) < 3):
             raise RegisterInvalidBirthdate()
 
-
+        prev_handle = self.browser_handler.current_window_handle
         mail_bot = ProtonMail(custom_b_handler = self.browser_handler)
         self.browser_handler.switch_to.new_window('proton')
         mail_bot.init_web()
         maildata = mail_bot.register(email, pwd)
         if(not maildata):
             raise MailCreationError()
-        self.browser_handler.switch_to.window(self.whandle)
+        self.browser_handler.switch_to.window(prev_handle)
 
         warning('Esperando a que el correo madure: 3 min.')
         time.sleep(EMAIL_MADURATION_TIME)
