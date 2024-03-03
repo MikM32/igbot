@@ -1003,6 +1003,7 @@ class IgBot(Browser):
 
         prev_handle = self.browser_handler.current_window_handle
         mail_bot = ProtonMail(custom_b_handler = self.browser_handler, custom_vpn=self.vpn)
+        self.wait('micro')
         self.browser_handler.switch_to.new_window('proton')
         mail_bot.init_web()
         if self.is_headless:
@@ -1010,6 +1011,7 @@ class IgBot(Browser):
         maildata = mail_bot.register(email, pwd)
         if(not maildata):
             raise MailCreationError()
+        self.wait('micro')
         self.browser_handler.switch_to.window(prev_handle)
 
         warning('Esperando a que el correo madure: 3 min.')
