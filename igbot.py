@@ -164,6 +164,7 @@ class Browser:
         self.def_browser = None
         self.is_headless = headless
         self.use_vpn = use_vpn
+        self.vpn = None
         self.is_active_vpn = False
         self.__is_hide = False
         self.__first_run = False
@@ -178,7 +179,8 @@ class Browser:
         self.options = None
         self.service = None
         self.sleep_secs = None
-
+    def get_hidden(self):
+        return self.__is_hide
     def _patch_chromedriver(self):
         """
             Reemplaza la JSfingerprint del webdriver para evitar detecciones
@@ -548,8 +550,11 @@ class UrbanVpn(Browser):
         self.wait('nano')
 
     def switch_to_vpn(self):
-
-        self.browser_handler.switch_to.window(self.whandle)
+        if self.whandle:
+            self.wait('nano')
+            self.browser_handler.switch_to.window(self.whandle)
+        else:
+            warning('No se puede cambiar a la pestaña del vpn porque no se ha abierto todavia')
 
     def close(self):
         self.__is_in_page = False
@@ -565,12 +570,13 @@ class ProtonMail(Browser):
                  browser_path: str='',
                  custom_b_handler: webdriver.Chrome = None,
                  use_vpn: bool = False,
+                 custom_vpn: UrbanVpn = None,
                  headless: bool = False
                  ):
 
         self.username = username
         self.pwd = pwd
-        self.vpn = None
+        self.vpn = custom_vpn
         self.whandle = ''
 
         super().__init__(browser_path, custom_b_handler, use_vpn, headless)
@@ -586,8 +592,7 @@ class ProtonMail(Browser):
     def activate_vpn(self):
         if not self.vpn:
             raise IgBotNotInitializedVpn()
-        if self.is_active_vpn:
-            return
+    
         prev_handle = self.browser_handler.current_window_handle
         self.vpn.switch_to_vpn()
         self.vpn.activate()
@@ -596,16 +601,22 @@ class ProtonMail(Browser):
     def deactivate_vpn(self):
         if not self.vpn:
             raise IgBotNotInitializedVpn()
-        if not self.is_active_vpn:
-            return
         prev_handle = self.browser_handler.current_window_handle
         self.vpn.switch_to_vpn()
         self.vpn.deactivate()
         self.browser_handler.switch_to.window(prev_handle)
 
+    def reactivate_vpn(self):
+        prev_handle = self.browser_handler.current_window_handle
+        self.vpn.switch_to_vpn()
+        self.vpn.deactivate()
+        self.wait('nano')
+        self.vpn.activate()
+        self.browser_handler.switch_to.window(prev_handle)
+
     def init_web(self):
         if self.use_vpn:
-            if not self.is_active_vpn:
+            if not self.vpn:
                 self._init_vpn()
 
     def create_new_account(self) -> tuple[str]:
@@ -614,9 +625,10 @@ class ProtonMail(Browser):
                              
     def register(self, email:str, pwd:str ) -> tuple[str]:
         self.whandle = self.browser_handler.current_window_handle
-        if self.use_vpn:
-            if not self.is_active_vpn:
-                self.activate_vpn()
+        # if self.use_vpn:
+        #     if not self.is_active_vpn:
+        #         self.activate_vpn()
+
         self.browser_handler.get(PROTONMAIL_REG_URL)
 
         # locator = (By.CSS_SELECTOR, f'input[class="{PREG_EMAIL_INPUT_ID}"]:nth-child(2)')
@@ -666,13 +678,28 @@ class ProtonMail(Browser):
         locator = (By.XPATH, "//h1[contains(text(), 'Verifica')]")
         get_element(self.browser_handler, locator)
         while True:
-            try:
+            try: 
                  self.browser_handler.find_element(By.XPATH, "//span[contains(text(), 'CAPTCHA')]")
                  warning('debe resolver el captcha para poder continuar')
-                 self.wait('micro')
+                 self.wait()
+                 if self.is_headless:
+                    self.show_window()   
             except:
+                 if self.is_headless:
+                    self.hide_window()
                  print('listo')
                  break
+                 
+        # reinicia el vpn y vuelve a ejecutar el metodo si no carga el captcha
+        try:
+            self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'SMS')]")
+            warning('no se cargo el captcha, se volvera a ejecutar el metodo.')
+            self.reactivate_vpn()
+            
+            return self.register(email, pwd)
+
+        except:
+            pass  
         
         self.wait('micro')
 
@@ -744,6 +771,12 @@ class ProtonMail(Browser):
             warning(f'No se encontraron elementos necesarios para poder leer el correo: {e}')
         
         return None
+    
+    def close_web(self):
+        prev_handle = self.browser_handler.current_window_handle
+        self.browser_handler.switch_to.window(self.whandle)
+        self.browser_handler.close()
+        self.browser_handler.switch_to.window(prev_handle)
 
     def close(self):
         if self.use_vpn:
@@ -784,11 +817,12 @@ class IgBot(Browser):
                  browser_path: str ='',
                  custom_b_handler: webdriver.Chrome = None,
                  use_vpn: bool = False,
+                 custom_vpn: UrbanVpn = None,
                  headless:bool = False):
 
         self.username = username
         self.pwd = pwd
-        self.vpn = None
+        self.vpn = custom_vpn
         self.is_logged = False
         self.__is_init = False
         self.__is_in_page = False
@@ -828,6 +862,7 @@ class IgBot(Browser):
         prev_handle = self.browser_handler.current_window_handle
         self.vpn.switch_to_vpn()
         self.vpn.activate()
+        self.wait('nano')
         self.browser_handler.switch_to.window(prev_handle)
 
     def deactivate_vpn(self):
@@ -837,6 +872,7 @@ class IgBot(Browser):
         prev_handle = self.browser_handler.current_window_handle
         self.vpn.switch_to_vpn()
         self.vpn.deactivate()
+        self.wait('nano')
         self.browser_handler.switch_to.window(prev_handle)
 
     def init_ig(self, preload_cookies:bool = True):
@@ -966,9 +1002,11 @@ class IgBot(Browser):
             raise RegisterInvalidBirthdate()
 
         prev_handle = self.browser_handler.current_window_handle
-        mail_bot = ProtonMail(custom_b_handler = self.browser_handler)
+        mail_bot = ProtonMail(custom_b_handler = self.browser_handler, custom_vpn=self.vpn)
         self.browser_handler.switch_to.new_window('proton')
         mail_bot.init_web()
+        if self.is_headless:
+            print(self.browser_handler.current_url)
         maildata = mail_bot.register(email, pwd)
         if(not maildata):
             raise MailCreationError()
@@ -977,9 +1015,13 @@ class IgBot(Browser):
         warning('Esperando a que el correo madure: 3 min.')
         time.sleep(EMAIL_MADURATION_TIME)
 
+        return self.register_rec(email, name, pwd, birth, mail_bot, maildata)
         
-
+        
+    def register_rec(self, email: str, name: str, pwd: str, birth_date: list, mail_bot: ProtonMail, mail_data: tuple):
         self.browser_handler.get(IG_REGISTRATION_URL)
+        if self.is_headless:
+            print(self.browser_handler.current_url)
 
         
         #Si aparece el popup preguntando si se desea aceptar cookies del sitio le de a aceptar
@@ -1049,21 +1091,31 @@ class IgBot(Browser):
 
             self.wait('micro')
             
-            #verificacion de captcha
+            # verificacion de captcha
             while True:
                 try:
                     self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'aptcha')]")
+                    warning('debe resolver el captcha para poder continuar con el registro de instagram.')
                     self.show_window()
                 except:
+                    self.hide_window()
                     break
             
-            time.sleep(50)
+            try:
+                warning('No se cargo el captcha y tampoco el formulario de verificacion por codigo, se reiniciara la pagina')
+                self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'Registrarte con tu número de teléfono')]")
+                
+                return self.register_rec(email, name, pwd, birth_date, mail_bot, mail_data)
 
-            
+            except:
+                pass            
+
+            time.sleep(50)
 
             prev_handle = self.browser_handler.current_window_handle
             self.browser_handler.switch_to.window(mail_bot.whandle)
             ver_code = mail_bot.get_mail_subject('Instagram') # Obtiene el subject del correo con el codigo de verificacion de instagram
+            self.wait('nano')
             self.browser_handler.switch_to.window(prev_handle)
             #self.active_window()
 
@@ -1089,14 +1141,20 @@ class IgBot(Browser):
                 while 'challenge' in self.browser_handler.current_url:
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
-                self.register(email, name, pwd, birth)
+                self.register(email, name, pwd, birth_date)
         
         finally:
-            return maildata
-
+            mail_bot.close_web()
+            return mail_data
+        
     def create_new_account(self) -> tuple[str]:
 
-        return self.register(gen_email(), gen_name(), gen_pwd(), gen_birth())
+        email = gen_email()
+        name = gen_name()
+        pwd = gen_pwd()
+        birth = gen_birth()
+
+        return self.register(email, name, pwd, birth)
 
 
     def login(self, sv_cookies: bool=False, accept_nt: bool=False):
@@ -1645,7 +1703,7 @@ def main():
     #bot.set_username('darkm31')
     #bot.pwd = 'password'
 
-    #bot.init_browser_handler()
+    bot.init_browser_handler()
     #bot.init_ig()
 
     #bot.create_new_account()
