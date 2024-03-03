@@ -1080,8 +1080,11 @@ class IgBot(Browser):
             code_input.send_keys(ver_code)
             self.wait('small')
             code_input.send_keys(Keys.ENTER)
-            
+
+            locator = (By.XPATH, "//*[contains(text(), 'Sugerencias para ti')]")
+            get_element(self.browser_handler, locator)
             print('cuenta creada con exito!')
+
             return (True, maildata)
 
         except Exception as e:
