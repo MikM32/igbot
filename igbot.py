@@ -1645,13 +1645,14 @@ def main():
     #bot.set_username('darkm31')
     #bot.pwd = 'password'
 
-    bot.init_browser_handler()
+    #bot.init_browser_handler()
     #bot.init_ig()
 
     #bot.create_new_account()
     #bot.close()
-    #bot.init_cfg()
-    #bot.init_ig()
+    bot.init_cfg()
+    bot.init_ig()
+    print(bot.create_new_account())
     #bot.register(gen_email(), gen_name(), 'wasridss2', gen_pwd(), gen_birth())
     #bot.wait('micro')
     #bot.show_window()
