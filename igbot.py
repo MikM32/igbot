@@ -496,7 +496,7 @@ class UrbanVpn(Browser):
             return
         elif not self.__is_in_page:
             raise PageNotLoaded(URBAN_VPN_LINK)
-
+        self.wait('nano')
         try:
             c_locator = (By.CSS_SELECTOR, f'li[class="{LOCATION_ITEM_CLASS}"]')
             s_locator = (By.CSS_SELECTOR, f'div[class="{SELECTION_INPUT_CLASSES}"]')
@@ -628,7 +628,7 @@ class ProtonMail(Browser):
         # if self.use_vpn:
         #     if not self.is_active_vpn:
         #         self.activate_vpn()
-
+        print(self.browser_handler.title)
         self.browser_handler.get(PROTONMAIL_REG_URL)
 
         # locator = (By.CSS_SELECTOR, f'input[class="{PREG_EMAIL_INPUT_ID}"]:nth-child(2)')
