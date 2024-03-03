@@ -689,7 +689,7 @@ class ProtonMail(Browser):
                     self.hide_window()
                  print('listo')
                  break
-                 
+
         # reinicia el vpn y vuelve a ejecutar el metodo si no carga el captcha
         try:
             self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'SMS')]")
@@ -1069,11 +1069,13 @@ class IgBot(Browser):
             except:
                 pass
 
-
+            
+            self.wait()
             locator = (By.CSS_SELECTOR, f'select[class="{DATE_SELECTORS}"]')
             selectors = get_elements(self.browser_handler, locator)
 
             for i in range(3):
+                self.wait('nano')
                 selectors[i].click()
 
                 locator = (By.CSS_SELECTOR, f'option[value="{birth_date[i]}"]')
@@ -1081,7 +1083,7 @@ class IgBot(Browser):
 
                 self.browser_handler.execute_script('arguments[0].scrollIntoView();', cur_opt)
                 cur_opt.click()
-                self.wait('small')
+                
 
             self.wait('micro')
 
