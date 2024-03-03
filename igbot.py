@@ -1045,7 +1045,8 @@ class IgBot(Browser):
             self.wait('small')
             #comprobar validez
             locator = (By.CSS_SELECTOR, f'button[class="{GEN_USER_BT}"]')
-            gen_user = get_clickable_element(self.browser_handler, locator)
+            #           get_clickable_element
+            gen_user = get_element(self.browser_handler, locator)
             gen_user.click()
             self.wait('small')
             #inputs[2].send_keys(username)
@@ -1074,15 +1075,19 @@ class IgBot(Browser):
             locator = (By.CSS_SELECTOR, f'select[class="{DATE_SELECTORS}"]')
             selectors = get_elements(self.browser_handler, locator)
 
-            for i in range(3):
-                self.wait('nano')
-                selectors[i].click()
+            try:
+                for i in range(3):
+                    self.wait('nano')
+                    selectors[i].click()
 
-                locator = (By.CSS_SELECTOR, f'option[value="{birth_date[i]}"]')
-                cur_opt = get_element(self.browser_handler, locator)
+                    locator = (By.CSS_SELECTOR, f'option[value="{birth_date[i]}"]')
+                    cur_opt = get_element(self.browser_handler, locator)
 
-                self.browser_handler.execute_script('arguments[0].scrollIntoView();', cur_opt)
-                cur_opt.click()
+                    self.browser_handler.execute_script('arguments[0].scrollIntoView();', cur_opt)
+                    cur_opt.click()
+            except Exception as e:
+                warning('No se encontraron algunos elementos del selector de fechas')
+                warning(f'{str(e)}')
                 
 
             self.wait('micro')
