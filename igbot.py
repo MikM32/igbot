@@ -1085,9 +1085,19 @@ class IgBot(Browser):
             get_element(self.browser_handler, locator)
             print('cuenta creada con exito!')
 
+            prev_handle = self.browser_handler.current_window_handle
+            self.browser_handler.switch_to.window(mail_bot.whandle)
+            self.browser_handler.close()
+            self.browser_handler.switch_to.window(prev_handle)
+
             return (True, maildata)
 
         except Exception as e:
+            prev_handle = self.browser_handler.current_window_handle
+            self.browser_handler.switch_to.window(mail_bot.whandle)
+            self.browser_handler.close()
+            self.browser_handler.switch_to.window(prev_handle)
+
             warning(f'No se puede registrar una nueva cuenta porque no se encontraron algunos elementos\n{str(e)}')
             if self.check_challenge():
                 while 'challenge' in self.browser_handler.current_url:
