@@ -1096,6 +1096,7 @@ class IgBot(Browser):
                 self.browser_handler.switch_to.window(mail_bot.whandle)
                 self.wait('small')
                 ver_code = mail_bot.get_mail_subject('Instagram') # Obtiene el subject del correo con el codigo de verificacion de instagram
+                
                 self.wait('small')
                 self.browser_handler.switch_to.window(prev_handle)
             else:
@@ -1104,7 +1105,9 @@ class IgBot(Browser):
 
             if not ver_code:
                 raise MailInstagramVerificationCodeNotFound()
-            
+            else:
+                ver_code = ver_code.split()[0]
+                
             print(f'codigo de verificacion: {ver_code}')
 
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_INPUT}"]')
