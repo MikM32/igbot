@@ -1130,14 +1130,14 @@ class IgBot(Browser):
             # locator = (By.XPATH, "//*[contains(text(), 'Activar notificaciones')]")
             # get_element(self.browser_handler, locator)
             self.wait('small')
-            if 'www.instagram.com' == self.browser_handler.current_url:
+            if 'https://www.instagram.com/' == self.browser_handler.current_url:
                 print('cuenta creada con exito!')
             else:
                 try:
                     locator = (By.XPATH, "span[contains(text(), 'Activar notificaciones')]")
                     get_element(self.browser_handler, locator)
                 except:
-                    if 'www.instagram.com' == self.browser_handler.current_url:
+                    if 'https://www.instagram.com/' == self.browser_handler.current_url:
                         print('cuenta creada con exito!')
                     else:
                         raise InstagramVerificationCodeBackendError()
