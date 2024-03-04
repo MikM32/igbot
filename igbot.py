@@ -726,14 +726,18 @@ class ProtonMail(Browser):
     def get_mail_subject(self, mail_kword: str) -> str:
         
         #self.active_window()
-        self.wait()
+        #self.wait()
         #try:
         locator = (By.CSS_SELECTOR, 'svg[data-testid="navigation-link:refresh-folder"]')
         refresh_bt = get_element(self.browser_handler, locator)
         refresh_bt.click()
 
-        self.wait('small')
+        self.wait('micro')
+        refresh_bt.click()
+        self.wait('micro')
+        refresh_bt.click()
 
+        self.wait('small')
         locator = (By.CSS_SELECTOR, 'span[role="heading"]')
         subjects = get_elements(self.browser_handler, locator)
 
@@ -1070,8 +1074,21 @@ class IgBot(Browser):
             time.sleep(3)
             self.browser_handler.switch_to.window(prev_handle)
             #self.active_window()
+            
+            if not ver_code:
+                prev_handle = self.browser_handler.current_window_handle
+                self.browser_handler.switch_to.window(mail_bot.whandle)
+                time.sleep(7.2)
+                ver_code = mail_bot.get_mail_subject('Instagram') # Obtiene el subject del correo con el codigo de verificacion de instagram
+                time.sleep(3)
+                self.browser_handler.switch_to.window(prev_handle)
+            else:
+                ver_code = ver_code.split()[0] # formatea la string del subject para obtener solo el codigo (suele estar al comienzo)
+            
 
-            ver_code = ver_code.split()[0] # formatea la string del subject para obtener solo el codigo (suele estar al comienzo)
+            if not ver_code:
+                raise MailInstagramVerificationCodeNotFound()
+            
             print(f'codigo de verificacion: {ver_code}')
 
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_INPUT}"]')

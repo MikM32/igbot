@@ -105,5 +105,10 @@ class MailCreationError(Exception):
         self.msg = 'No se ha podido crear correctamente el correo'
         super().__init__(self.msg)
 
+class MailInstagramVerificationCodeNotFound(Exception):
+    def __init__(self):
+        self.msg = 'No se ha encontrado en los correos el codigo de verificacion de Instagram.'
+        super().__init__(self.msg)
+
 def warning(msg:str):
     print(f"Advertencia!: {msg}")
