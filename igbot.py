@@ -1655,7 +1655,6 @@ class IgBot(Browser):
 
         for user in users:
             try:
-                self.wait('micro')
                                     #get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
                 search_user_input = self.browser_handler.find_element(By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]')
                 search_user_input.send_keys(user)
