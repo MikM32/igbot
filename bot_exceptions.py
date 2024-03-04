@@ -43,36 +43,50 @@ class ResultsNotFound(Exception):
     def __init__(self, search:str):
         self.msg = "No se encontraron resultados para la busqueda: {}.".format(search)
         super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
 
 class PageNotLoaded(Exception):
     def __init__(self, page:str):
         self.msg = "No se ha cargado la pagina: {}.".format(page)
         super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
 
 class IgUsernameNotFound(Exception):
     def __init__(self):
         self.msg = "Falta el nombre de usuario de instagram."
         super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
 
 class BrowserVpnNotEnable(Exception):
     def __init__(self):
         self.msg = "No se habilito el vpn para este navegador."
         super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
 
 class WaitTypeException(Exception):
     def __init__(self, type: str):
         self.msg = f"El tipo de espera '{type}' no pertenece al conjunto de tipos validos. Los tipos validos son normal, small, micro y nano"
         super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
 
 class LoginNoUserException(Exception):
     def __init__(self):
         self.msg = "No se ingreso un usuario para iniciar sesion"
         super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
 
 class LoginNoPasswordException(Exception):
     def __init__(self):
         self.msg = "No se ingreso una password para iniciar sesion"
         super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
 
 class RegisterUsernameInUse(Exception):
     def __init__(self, msg:str):
@@ -89,26 +103,43 @@ class RegisterInvalidEmail(Exception):
 class RegisterInvalidUsername(Exception):
     def __init__(self, msg:str):
         super().__init__(msg)
+    def __str__(self):
+        return self.msg
 
 class RegisterInvalidBirthdate(Exception):
     def __init__(self):
         self.msg = 'Fecha de nacimiento invalida, la fecha debe contener dia/mes/año'
         super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
 
 class IgBotNotInitializedVpn(Exception):
     def __init__(self):
         self.msg = 'No se ha inicializado el atributo: IgBot.vpn'
         super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
 
 class MailCreationError(Exception):
     def __init__(self):
         self.msg = 'No se ha podido crear correctamente el correo'
         super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
 
 class MailInstagramVerificationCodeNotFound(Exception):
     def __init__(self):
         self.msg = 'No se ha encontrado en los correos el codigo de verificacion de Instagram.'
         super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
+
+class InstagramVerificationCodeBackendError(Exception):
+    def __init__(self):
+        self.msg = 'No se ha podido verificar.'
+        super().__init__(self.msg)
+    def __str__(self):
+        return self.msg
 
 def warning(msg:str):
     print(f"Advertencia!: {msg}")

@@ -1129,7 +1129,7 @@ class IgBot(Browser):
             if 'www.instagram.com' == self.browser_handler.current_url:
                 print('cuenta creada con exito!')
             else:
-                raise Exception
+                raise InstagramVerificationCodeBackendError()
 
             prev_handle = self.browser_handler.current_window_handle
             self.browser_handler.switch_to.window(mail_bot.whandle)
