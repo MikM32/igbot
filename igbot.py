@@ -1133,7 +1133,14 @@ class IgBot(Browser):
             if 'www.instagram.com' == self.browser_handler.current_url:
                 print('cuenta creada con exito!')
             else:
-                raise InstagramVerificationCodeBackendError()
+                try:
+                    locator = (By.XPATH, "span[contains(text(), 'Activar notificaciones')]")
+                    get_element(self.browser_handler, locator)
+                except:
+                    if 'www.instagram.com' == self.browser_handler.current_url:
+                        print('cuenta creada con exito!')
+                    else:
+                        raise InstagramVerificationCodeBackendError()
 
             prev_handle = self.browser_handler.current_window_handle
             self.browser_handler.switch_to.window(mail_bot.whandle)
