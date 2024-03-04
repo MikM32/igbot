@@ -1080,23 +1080,23 @@ class IgBot(Browser):
                 except:
                     break
             
-            time.sleep(90)
-            warning('esperando a que instagram madure: 1.3 min')
+            time.sleep(30)
+            warning('esperando a que instagram madure: 0.5 min')
 
             prev_handle = self.browser_handler.current_window_handle
             self.browser_handler.switch_to.window(mail_bot.whandle)
-            time.sleep(7.2)
+            self.wait('small')
             ver_code = mail_bot.get_mail_subject('Instagram') # Obtiene el subject del correo con el codigo de verificacion de instagram
-            time.sleep(3)
+            self.wait('small')
             self.browser_handler.switch_to.window(prev_handle)
             #self.active_window()
             
             if not ver_code:
                 prev_handle = self.browser_handler.current_window_handle
                 self.browser_handler.switch_to.window(mail_bot.whandle)
-                time.sleep(7.2)
+                self.wait('small')
                 ver_code = mail_bot.get_mail_subject('Instagram') # Obtiene el subject del correo con el codigo de verificacion de instagram
-                time.sleep(3)
+                self.wait('small')
                 self.browser_handler.switch_to.window(prev_handle)
             else:
                 ver_code = ver_code.split()[0] # formatea la string del subject para obtener solo el codigo (suele estar al comienzo)
@@ -1111,7 +1111,7 @@ class IgBot(Browser):
             code_input = get_element(self.browser_handler, locator)
             code_input.click()
 
-            self.wait('small')
+            self.wait('micro')
             
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_ACTIVE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
