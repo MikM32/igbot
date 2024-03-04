@@ -1663,7 +1663,7 @@ class IgBot(Browser):
                 locator = (By.CSS_SELECTOR, 'div[aria-label="Borrar búsqueda"]')
                 discard_in = get_element(self.browser_handler, locator)
 
-                self.wait('search')
+                self.wait('micro')
                 unfollow_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]'))
                 unfollow_bt.click()
                 accept_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{ACCEPT_UNFOLLOW}"]'))
@@ -1675,6 +1675,7 @@ class IgBot(Browser):
                 locator = (By.CSS_SELECTOR, 'div[aria-label="Borrar búsqueda"]')
                 discard_in = get_element(self.browser_handler, locator)
                 discard_in.click()
+                self.wait('micro')
                 if self.check_challenge():
                     while 'challenge' in self.browser_handler.current_url:
                         warning('Se debe resolver el captcha para poder continuar.')
@@ -1830,9 +1831,9 @@ def main():
     #bot.show_window()
     #bot.accept_notifications(False)
     #bot.comment_post('https://www.instagram.com/p/C3tRu41pVEE/', '.')
-    bot.unfollow_users(['stefan_codes', 'arelis_reyes19', 'alexandra_h593', 'yolandavirgilianoguera', 'ayfdeveloper', 'operadely', 'devcaress', 's.gr_______', 'misspatryc', 'codigobits', 'tatianna.testing', 'escafe_ve', 'ana_gvillanueva', 'bariscafe.ccs', '_byters', 'iosoyjoss_', 'alexsaulibeth', 'jesusojeda35', 'darvimhz_', 'candylovevzla', 'jesus_z21', 'mae_mazcort', 'ixicrown', 'freddy_espinel', 'deremateshoes', 'eldiezzy', 'mariocastillo3148', 'eugeniorp54', 'david.1806', 'systemline_', 'bakeryy_and_cakesshop'])
+    #bot.unfollow_users(['stefan_codes', 'arelis_reyes19', 'alexandra_h593', 'yolandavirgilianoguera', 'ayfdeveloper', 'operadely', 'devcaress', 's.gr_______', 'misspatryc', 'codigobits', 'tatianna.testing', 'escafe_ve', 'ana_gvillanueva', 'bariscafe.ccs', '_byters', 'iosoyjoss_', 'alexsaulibeth', 'jesusojeda35', 'darvimhz_', 'candylovevzla', 'jesus_z21', 'mae_mazcort', 'ixicrown', 'freddy_espinel', 'deremateshoes', 'eldiezzy', 'mariocastillo3148', 'eugeniorp54', 'david.1806', 'systemline_', 'bakeryy_and_cakesshop'])
     #bot.like_posts('lucasmeloryt')
-    #bot.upload_post('Desktop/kk.png', 'Somethingsomethingsomething')
+    bot.upload_post('C:/Users/Ines/Desktop/modsd.png', 'juas')
     #print(bot.my_followers_num())
     #print(bot.follow_by_hashtag('#programacionvenezuela', False))
     #time.sleep(1000)
