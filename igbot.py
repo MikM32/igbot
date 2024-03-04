@@ -986,9 +986,11 @@ class IgBot(Browser):
             self.browser_handler.switch_to.new_window('proton')
             mail_bot.init_web()
             maildata = mail_bot.register(email, pwd)
+            self.browser_handler.switch_to.window(prev_handle)
+            
             if(not maildata):
                 raise MailCreationError()
-            self.browser_handler.switch_to.window(prev_handle)
+            
 
             warning('Esperando a que el correo madure: 3 min.')
             time.sleep(EMAIL_MADURATION_TIME)
