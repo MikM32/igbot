@@ -1072,6 +1072,8 @@ class IgBot(Browser):
             self.wait('micro')
             
             #verificacion de captcha
+            locator = (By.XPATH, "//*[contains(text(), 'Registrarte con tu número')]")
+            get_element(self.browser_handler, locator)
             while True:
                 try:
                     self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'aptcha')]")
