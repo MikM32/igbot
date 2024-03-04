@@ -1078,6 +1078,7 @@ class IgBot(Browser):
                     warning('Debe resolver el captcha para poder continuar')
                     self.show_window()
                 except:
+                    self.hide_window()
                     break
             
             time.sleep(30)
@@ -1107,7 +1108,7 @@ class IgBot(Browser):
                 raise MailInstagramVerificationCodeNotFound()
             else:
                 ver_code = ver_code.split()[0]
-                
+
             print(f'codigo de verificacion: {ver_code}')
 
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_INPUT}"]')
@@ -1124,7 +1125,7 @@ class IgBot(Browser):
 
             # locator = (By.XPATH, "//*[contains(text(), 'Activar notificaciones')]")
             # get_element(self.browser_handler, locator)
-            self.wait('micro')
+            self.wait('small')
             if 'www.instagram.com' == self.browser_handler.current_url:
                 print('cuenta creada con exito!')
             else:
@@ -1143,7 +1144,7 @@ class IgBot(Browser):
             self.browser_handler.close()
             self.browser_handler.switch_to.window(prev_handle)
 
-            warning(f'No se puede registrar una nueva cuenta porque no se encontraron algunos elementos\n{str(e)}')
+            warning(f'No se puede registrar una nueva cuenta porque no se encontraron algunos elementos\n{e}')
             if self.check_challenge():
                 while 'challenge' in self.browser_handler.current_url:
                     warning('Se debe resolver el captcha para poder continuar.')
