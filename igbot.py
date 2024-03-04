@@ -614,6 +614,8 @@ class ProtonMail(Browser):
                              
     def register(self, email:str, pwd:str ) -> tuple[str]:
         self.whandle = self.browser_handler.current_window_handle
+        if self.is_headless:
+            self.hide_window()
         if self.use_vpn:
             if not self.is_active_vpn:
                 self.activate_vpn()
