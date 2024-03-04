@@ -1088,26 +1088,34 @@ class IgBot(Browser):
             time.sleep(30)
             warning('esperando a que instagram madure: 0.5 min')
 
-            prev_handle = self.browser_handler.current_window_handle
-            self.browser_handler.switch_to.window(mail_bot.whandle)
-            self.wait('small')
-            ver_code = mail_bot.get_mail_subject('Instagram') # Obtiene el subject del correo con el codigo de verificacion de instagram
-            self.wait('small')
-            self.browser_handler.switch_to.window(prev_handle)
-            #self.active_window()
+            # prev_handle = self.browser_handler.current_window_handle
+            # self.browser_handler.switch_to.window(mail_bot.whandle)
+            # self.wait('small')
+            # ver_code = mail_bot.get_mail_subject('Instagram') # Obtiene el subject del correo con el codigo de verificacion de instagram
+            # self.wait('small')
+            # self.browser_handler.switch_to.window(prev_handle)
+            # #self.active_window()
             
-            if not ver_code:
-                prev_handle = self.browser_handler.current_window_handle
-                self.browser_handler.switch_to.window(mail_bot.whandle)
-                self.wait('small')
-                ver_code = mail_bot.get_mail_subject('Instagram') # Obtiene el subject del correo con el codigo de verificacion de instagram
+            # if not ver_code:
+            #     prev_handle = self.browser_handler.current_window_handle
+            #     self.browser_handler.switch_to.window(mail_bot.whandle)
+            #     self.wait('small')
+            #     ver_code = mail_bot.get_mail_subject('Instagram') # Obtiene el subject del correo con el codigo de verificacion de instagram
                 
-                self.wait('small')
-                self.browser_handler.switch_to.window(prev_handle)
-            else:
-                ver_code = ver_code.split()[0] # formatea la string del subject para obtener solo el codigo (suele estar al comienzo)
+            #     self.wait('small')
+            #     self.browser_handler.switch_to.window(prev_handle)
+            # else:
+            #     ver_code = ver_code.split()[0] # formatea la string del subject para obtener solo el codigo (suele estar al comienzo)
             
-
+            mail_attempts = 1
+            while True:
+                time.sleep(10)
+                ver_code = mail_bot.get_mail_subject('Instagram')
+                if (ver_code is None) and (mail_attempts <= 10):
+                    mail_attempts += 1
+                else:
+                    break
+                
             if not ver_code:
                 raise MailInstagramVerificationCodeNotFound()
             else:
