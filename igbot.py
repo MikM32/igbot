@@ -229,7 +229,10 @@ class Browser:
         #User Agent Randomizer
         #random_user_agent = secrets.choice(USER_AGENTS)
         #self.options.add_argument(f"--user-agent={random_user_agent}")
-            
+        self.options.add_argument('--log-level=3')
+        self.options.add_argument('--disable-notifications')
+        self.options.add_argument('--no-default-browser-check')
+        self.options.add_argument('--disable-notifications')
         self.options.add_argument(f'--profile-directory=Default')
         #else:
         #    self.options.add_argument(f'--args')
@@ -238,7 +241,9 @@ class Browser:
         #    self.__first_run = True
 
         #Este parametro evita que aparezca el mensaje "Un software automatizado esta controlando chrome"
-        self.options.add_experimental_option('excludeSwitches', ["enable-automation"])
+        self.options.add_experimental_option('excludeSwitches', ["enable-automation", "enable-logging"])
+        preferencias = {"profile.default_content_setting_values.notifications" : 2} # 0=preguntar , 1=permitir, 2= no permitir
+        self.options.add_experimental_option('prefs', preferencias)
 
         #Este parametro permite que la ventana del navegador permanezca abierta aun despues de haber realizado alguna tarea.
         self.options.add_experimental_option('detach', True)
@@ -875,8 +880,6 @@ class IgBot(Browser):
         """
             Metodo que carga las cookies de sesion (si se le especifica) e inicia la pagina principal de instagram
         """
-        if self.__is_init:
-            return
         
         #self.browser_handler.implicitly_wait(5)
         if preload_cookies:
@@ -891,7 +894,7 @@ class IgBot(Browser):
                 warning(IgUsernameNotFound().msg)
                 #raise IgUsernameNotFound()
 
-
+        #self.browser_handler.switch_to.new_window('ig')
         self.browser_handler.get(IG_URL)
         if self.is_headless:
             self.hide_window()
@@ -1431,7 +1434,7 @@ class IgBot(Browser):
         #Verifica si hay resultados para el hashtag ingresado
         try:
             #self.browser_handler.find_element(By.XPATH, "//span[contains(text(),'{}')]".format(NOT_FOUND_MSG))
-            get_element(self.browser_handler, (By.XPATH, f"//span[contains(text(),'{NOT_FOUND_MSG}')]"))
+            self.browser_handler.find_element(By.XPATH, f"//span[contains(text(),'{NOT_FOUND_MSG}')]")
             raise ResultsNotFound(hashtag)
         except NoSuchElementException:
             pass
@@ -1469,7 +1472,7 @@ class IgBot(Browser):
         try:
             self.wait('nano')
             #initial_account = self.browser_handler.find_element(By.CSS_SELECTOR, f'a[class="{POST_ACCOUNT_LINK_CLASSES}"]')
-            initial_account = get_element(self.browser_handler, (By.CSS_SELECTOR, f'a[class="{POST_ACCOUNT_LINK_CLASSES}"]'))
+            initial_account = get_element(self.browser_handler, (By.CSS_SELECTOR, f'a[class="{POST_ACCOUNT_LINK_CLASSES2}"]'))
             initial_account.click()
 
         except NoSuchElementException as e:
@@ -1488,7 +1491,7 @@ class IgBot(Browser):
             #Reduce el tamaño de la ventana para que aparezca la scroll bar y asi poder actualizar la lista de seguidores
             #   ya que por algun motivo que desconozco al bajar la scroll bar del widget de la lista de seguidores hasta el final
             #   esta lista no se actualiza y solo se actualiza cuando estoy en el final y subo y bajo el scroll bar de la ventana de la pagina.
-            self.browser_handler.set_window_size(412, 400)
+            #self.browser_handler.set_window_size(412, 400)
             locator = (By.CSS_SELECTOR, f'div[class="{AC_FOLLOWERS_SEC_CLASS}"]')
             followers_box = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
 
@@ -1497,26 +1500,36 @@ class IgBot(Browser):
             #bucle que actualiza la lista de seguidores hasta que la cantidad coincida con el limite especificado previamente
             attempt = 0
             prev_len = 0
+            last_user = None
+            prev_last = None
             while True:
-
-                self._update_follow_list(followers_box)
+                self.wait('micro')
+                #self._update_follow_list(followers_box)
                 #followers_list = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(locator))
                 followers_list = get_elements(self.browser_handler, locator)
-                followers_len = len(followers_list)
+                last_user = followers_list[-1]
+                self.browser_handler.execute_script("arguments[0].scrollIntoView();",last_user)
 
-                if (followers_len >= limit) or (attempt > 4):
+                followers_len = len(followers_list)
+                if (followers_len >= limit):
                     account_list = followers_list
                     break
-                elif followers_len == prev_len:
-                    attempt+=1
-                else:
-                    prev_len = followers_len
+                #prev_last = last_user
+                # if (followers_len >= limit) or (attempt > 4):
+                #     account_list = followers_list
+                #     break
+                # elif followers_len == prev_len:
+                #     attempt+=1
+                # else:
+                #     prev_len = followers_len
 
 
             for account in account_list:
+                print(account.text)
                 ac_span = account.find_element(By.CSS_SELECTOR, f'span[class="{AC_FOLLOWER_NAME_CLASSES}"]')
-                ac_follow_bt = account.find_element(By.CSS_SELECTOR, f'button[class="{AC_FOLLOWER_FOLLOW_BT_CLASSES}"]')
-
+                #ac_follow_bt = account.find_element(By.CSS_SELECTOR, f'button[class="{AC_FOLLOWER_FOLLOW_BT_CLASSES}"]')
+                ac_follow_bt = account.find_element(By.CSS_SELECTOR, f'div[class="_ap3a _aaco _aacw _aad6 _aade"]')
+                
                 self.browser_handler.execute_script('arguments[0].scrollIntoView()', ac_follow_bt)
                 account_users.append(ac_span.text)
 
@@ -1573,9 +1586,9 @@ class IgBot(Browser):
 
     def _update_follow_list(self, follow_box):
         self.browser_handler.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight)", follow_box)
-        self.wait('nano')
+        self.wait('micro')
         self.browser_handler.execute_script("window.scrollTo(0,0)")
-        self.wait('nano')
+        self.wait('micro')
         self.browser_handler.execute_script("window.scrollTo(0,document.body.scrollHeight)")
         self.wait('micro')
 
@@ -1791,8 +1804,8 @@ def main():
     #proton.activate_vpn()
     #proton.register("ayahuasca3240", "987659821.")
     #print(proton.create_new_account())
-    bot = IgBot(use_vpn=True)
-    #bot.set_username('darkm31')
+    bot = IgBot(use_vpn=False)
+    bot.set_username('darkm31')
     #bot.pwd = 'password'
 
     #bot.init_browser_handler()
@@ -1802,7 +1815,7 @@ def main():
     #bot.close()
     bot.init_cfg()
     bot.init_ig()
-    print(bot.create_new_account())
+    #print(bot.create_new_account())
     #bot.register(gen_email(), gen_name(), 'wasridss2', gen_pwd(), gen_birth())
     #bot.wait('micro')
     #bot.show_window()
@@ -1812,7 +1825,7 @@ def main():
     #bot.like_posts('lucasmeloryt')
     #bot.upload_post('Desktop/kk.png', 'Somethingsomethingsomething')
     #print(bot.my_followers_num())
-    #print(bot.follow_by_hashtag('#programacionvenezuela'))
+    print(bot.follow_by_hashtag('#programacionvenezuela', False))
     #time.sleep(1000)
 
     #bot.close()
