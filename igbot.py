@@ -1659,9 +1659,10 @@ class IgBot(Browser):
         Esta funcion deja de seguir una lista de usuarios (users: list[str])
         """
         self.open_my_profile()
-        self.open_following_list()
+        #self.open_following_list()
 
         for user in users:
+            self.open_following_list()
             try:
                 self.wait('nano')
                                     #get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
@@ -1698,6 +1699,9 @@ class IgBot(Browser):
                         warning('Se debe resolver el captcha para poder continuar.')
                         self.wait()
                     self.unfollow_users(users)
+            finally:
+                close_frame = self.browser_handler.find_element(By.CSS_SELECTOR, 'svg[aria-label="Cerrar"]')
+                close_frame.click()
 
 
 
