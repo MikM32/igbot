@@ -1009,9 +1009,15 @@ class IgBot(Browser):
             inputs[1].send_keys(name)
             self.wait('small')
             #comprobar validez
-            locator = (By.CSS_SELECTOR, f'button[class="{GEN_USER_BT}"]')
-            gen_user = get_clickable_element(self.browser_handler, locator)
-            gen_user.click()
+            try:
+                locator = (By.CSS_SELECTOR, f'button[class="{GEN_USER_BT}"]')
+                gen_user = get_clickable_element(self.browser_handler, locator)
+                gen_user.click()
+            except:
+                n1 = gen_name()
+                n2 = gen_name()
+                username = n1[ : len(n1)//2] + n2[len(n2)//2 : ] + '_' +secrets.token_hex(2) + chr(secrets.randbelow(9) + 97)
+                inputs[2].send_keys(username)
             self.wait('small')
             #inputs[2].send_keys(username)
             #comprobar validez
