@@ -673,6 +673,15 @@ class ProtonMail(Browser):
             except:
                  print('listo')
                  break
+            
+        flg = False
+        try:
+            self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'SMS')]")
+            flg = True
+        except:
+            pass
+
+        assert not flg 
         
         self.wait('micro')
 
