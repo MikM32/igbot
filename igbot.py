@@ -277,8 +277,10 @@ class Browser:
                 title= ''
                 if inital_page:
                     title = 'data:,'
+                    #title = 'Sin título'
                 else:
                     title = self.browser_handler.title
+                print(title)
                 display_window(title, False)
                 self.__is_hide = True
             except Exception as e:
@@ -287,6 +289,7 @@ class Browser:
     def show_window(self):
         if self.__is_hide:
             try:
+                print(self.browser_handler.title)
                 display_window(self.browser_handler.title, True)
                 self.__is_hide = False
             except Exception as e:
@@ -875,7 +878,7 @@ class IgBot(Browser):
         if self.__is_init:
             return
         
-        self.browser_handler.implicitly_wait(5)
+        #self.browser_handler.implicitly_wait(5)
         if preload_cookies:
             if self.username:
                 try:
@@ -888,7 +891,10 @@ class IgBot(Browser):
                 warning(IgUsernameNotFound().msg)
                 #raise IgUsernameNotFound()
 
+
         self.browser_handler.get(IG_URL)
+        if self.is_headless:
+            self.hide_window()
         #Si aparece el popup preguntando si se desea aceptar cookies del sitio le de a aceptar
         try:
             self.wait('micro')
@@ -972,8 +978,18 @@ class IgBot(Browser):
             Metodo que inicializa el browser handler, oculta la ventana si se le indica y activa el vpn tambien si se le indica.
         """
         self.init_browser_handler()
+        #time.sleep(4)
+        
         if self.is_headless:
-            self.hide_window(inital_page=True)
+            try:
+                WebDriverWait(self.browser_handler, 30).until('data:,' in self.browser_handler.title)
+                
+            except:
+                warning('no carga el titulo')
+            #self.hide_window(inital_page=True)
+            #self.hide_window()
+            display_window('Google chrome', False)
+
         if self.use_vpn:
             self._init_vpn()
             self.activate_vpn()
@@ -982,7 +998,9 @@ class IgBot(Browser):
         self.wait('nano')
 
     def register(self, email: str, name: str, pwd: str, birth: str) -> tuple:
-        
+        if self.is_headless:
+            self.show_window()
+            self.hide_window()
         try:
             self._check_login()
             warning('No se puede registrar una nueva cuenta porque hay una sesion activa.')
@@ -998,7 +1016,7 @@ class IgBot(Browser):
                 raise RegisterInvalidBirthdate()
         
             prev_handle = self.browser_handler.current_window_handle
-            mail_bot = ProtonMail(custom_b_handler = self.browser_handler)
+            mail_bot = ProtonMail(custom_b_handler = self.browser_handler, headless = self.is_headless)
             self.browser_handler.switch_to.new_window('proton')
             mail_bot.init_web()
             maildata = mail_bot.register(email, pwd)
@@ -1739,7 +1757,7 @@ def main():
     #proton.activate_vpn()
     #proton.register("ayahuasca3240", "987659821.")
     #print(proton.create_new_account())
-    bot = IgBot(use_vpn=True, headless=True)
+    bot = IgBot(use_vpn=True)
     #bot.set_username('darkm31')
     #bot.pwd = 'password'
 
