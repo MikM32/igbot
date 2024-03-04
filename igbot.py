@@ -852,6 +852,16 @@ class IgBot(Browser):
         self.vpn.deactivate()
         self.browser_handler.switch_to.window(prev_handle)
 
+    def reboot_vpn(self):
+        if not self.use_vpn:
+            raise IgBotNotInitializedVpn()
+        prev_handle = self.browser_handler.current_window_handle
+        self.vpn.switch_to_vpn()
+        self.vpn.deactivate()
+        time.sleep(4)
+        self.vpn.activate()
+        self.browser_handler.switch_to.window(prev_handle)
+
     def init_ig(self, preload_cookies:bool = True):
         """
             Metodo que carga las cookies de sesion (si se le especifica) e inicia la pagina principal de instagram
@@ -987,7 +997,7 @@ class IgBot(Browser):
             mail_bot.init_web()
             maildata = mail_bot.register(email, pwd)
             self.browser_handler.switch_to.window(prev_handle)
-            
+
             if(not maildata):
                 raise MailCreationError()
             
