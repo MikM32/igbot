@@ -1668,6 +1668,7 @@ class IgBot(Browser):
                 unfollow_bt.click()
                 accept_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{ACCEPT_UNFOLLOW}"]'))
                 accept_bt.click()
+                self.wait('micro')
 
                 discard_in.click()
             except Exception as e:
