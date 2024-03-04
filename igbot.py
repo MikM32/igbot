@@ -1656,7 +1656,8 @@ class IgBot(Browser):
         for user in users:
             try:
                 self.wait('micro')
-                search_user_input = get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
+                                    #get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
+                search_user_input = self.browser_handler.find_element(By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]')
                 search_user_input.send_keys(user)
                 search_user_input.send_keys(Keys.ENTER)
 
@@ -1666,6 +1667,7 @@ class IgBot(Browser):
                 self.wait('micro')
                 unfollow_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]'))
                 unfollow_bt.click()
+                self.wait('micro')
                 accept_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{ACCEPT_UNFOLLOW}"]'))
                 accept_bt.click()
                 self.wait('micro')
