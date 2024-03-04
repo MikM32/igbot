@@ -1340,7 +1340,7 @@ class IgBot(Browser):
 
             followers_link = self.browser_handler.find_element(By.CSS_SELECTOR, f'li[class="{AC_FOLLOWERS_LINK_CLASSES}"]:nth-child(2)')
             followers_link.click()
-        except TimeoutError:
+        except TimeoutException:
             warning('open_followers_list(): no se encontro el link para ver la lista de seguidores')
             if self.check_challenge():
                 while 'challenge' in self.browser_handler.current_url:
@@ -1357,7 +1357,9 @@ class IgBot(Browser):
             #WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
             get_element(self.browser_handler, locator)
 
-            followers_link = get_element(self.browser_handler, (By.CSS_SELECTOR, f'li[class="{AC_FOLLOWERS_LINK_CLASSES}"]:nth-child(3)'))
+            #locator = (By.CSS_SELECTOR, f'li[class="{AC_FOLLOWERS_LINK_CLASSES}"]:nth-child(3)')
+            locator = (By.XPATH, "//li[contains(text(), 'seguidos')]")
+            followers_link = get_element(self.browser_handler, locator)
             followers_link.click()
         except TimeoutException:
             warning('open_following_list(): no se encontro el link para ver la lista de seguidos')
@@ -1371,7 +1373,6 @@ class IgBot(Browser):
         self.open_my_profile()
         self.open_followers_list()
 
-        
         try:
             search_user_input = get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
             search_user_input.send_keys(user)
@@ -1399,6 +1400,11 @@ class IgBot(Browser):
                 while 'challenge' in self.browser_handler.current_url:
                     warning('Se debe resolver el captcha para poder continuar.')
                     self.wait()
+        finally:
+            #locator  = (By.CSS_SELECTOR, 'svg[class="Cerrar"]')
+            close_frame = self.browser_handler.find_element(By.CSS_SELECTOR, 'svg[class="Cerrar"]')
+            close_frame.click()
+            
         return False
 
     def follow_by_hashtag(self, hashtag: str, like_posts: bool, limit: int=30) -> list[str]:
@@ -1842,7 +1848,8 @@ def main():
     #bot.comment_post('https://www.instagram.com/p/C3tRu41pVEE/', '.')
     #bot.unfollow_users(['stefan_codes', 'arelis_reyes19', 'alexandra_h593', 'yolandavirgilianoguera', 'ayfdeveloper', 'operadely', 'devcaress', 's.gr_______', 'misspatryc', 'codigobits', 'tatianna.testing', 'escafe_ve', 'ana_gvillanueva', 'bariscafe.ccs', '_byters', 'iosoyjoss_', 'alexsaulibeth', 'jesusojeda35', 'darvimhz_', 'candylovevzla', 'jesus_z21', 'mae_mazcort', 'ixicrown', 'freddy_espinel', 'deremateshoes', 'eldiezzy', 'mariocastillo3148', 'eugeniorp54', 'david.1806', 'systemline_', 'bakeryy_and_cakesshop'])
     #bot.like_posts('lucasmeloryt')
-    bot.upload_post('C:/Users/Ines/Desktop/modsd.png', 'juas')
+    print(bot.is_following_me('rippoio'))
+    #bot.upload_post('C:/Users/Ines/Desktop/modsd.png', 'juas')
     #print(bot.my_followers_num())
     #print(bot.follow_by_hashtag('#programacionvenezuela', False))
     #time.sleep(1000)
