@@ -669,8 +669,12 @@ class ProtonMail(Browser):
             try:
                  self.browser_handler.find_element(By.XPATH, "//span[contains(text(), 'CAPTCHA')]")
                  warning('debe resolver el captcha para poder continuar')
+                 if self.is_headless:
+                    self.show_window()
                  self.wait('micro')
             except:
+                 if self.is_headless:
+                     self.hide_window()
                  print('listo')
                  break
             
@@ -1733,7 +1737,7 @@ def main():
     #proton.activate_vpn()
     #proton.register("ayahuasca3240", "987659821.")
     #print(proton.create_new_account())
-    bot = IgBot(use_vpn=True)
+    bot = IgBot(use_vpn=True, headless=True)
     #bot.set_username('darkm31')
     #bot.pwd = 'password'
 
