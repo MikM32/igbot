@@ -1511,17 +1511,17 @@ class IgBot(Browser):
                 self.browser_handler.execute_script("arguments[0].scrollIntoView();",last_user)
 
                 followers_len = len(followers_list)
-                if (followers_len >= limit):
-                    account_list = followers_list
-                    break
-                #prev_last = last_user
-                # if (followers_len >= limit) or (attempt > 4):
+                # if (followers_len >= limit):
                 #     account_list = followers_list
                 #     break
-                # elif followers_len == prev_len:
-                #     attempt+=1
-                # else:
-                #     prev_len = followers_len
+                #prev_last = last_user
+                if (followers_len >= limit) or (attempt > 10):
+                    account_list = followers_list
+                    break
+                elif followers_len == prev_len:
+                    attempt+=1
+                else:
+                    prev_len = followers_len
 
 
             for account in account_list:
@@ -1655,17 +1655,26 @@ class IgBot(Browser):
 
         for user in users:
             try:
+                self.wait('micro')
                 search_user_input = get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
                 search_user_input.send_keys(user)
                 search_user_input.send_keys(Keys.ENTER)
+
+                locator = (By.CSS_SELECTOR, 'div[aria-label="Borrar búsqueda"]')
+                discard_in = get_element(self.browser_handler, locator)
 
                 self.wait('search')
                 unfollow_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]'))
                 unfollow_bt.click()
                 accept_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{ACCEPT_UNFOLLOW}"]'))
                 accept_bt.click()
+
+                discard_in.click()
             except Exception as e:
                 warning(f'no se encontro a {user}')
+                locator = (By.CSS_SELECTOR, 'div[aria-label="Borrar búsqueda"]')
+                discard_in = get_element(self.browser_handler, locator)
+                discard_in.click()
                 if self.check_challenge():
                     while 'challenge' in self.browser_handler.current_url:
                         warning('Se debe resolver el captcha para poder continuar.')
@@ -1821,11 +1830,11 @@ def main():
     #bot.show_window()
     #bot.accept_notifications(False)
     #bot.comment_post('https://www.instagram.com/p/C3tRu41pVEE/', '.')
-    #bot.unfollow_users(['lucasmeloryt'])
+    bot.unfollow_users(['stefan_codes', 'arelis_reyes19', 'alexandra_h593', 'yolandavirgilianoguera', 'ayfdeveloper', 'operadely', 'devcaress', 's.gr_______', 'misspatryc', 'codigobits', 'tatianna.testing', 'escafe_ve', 'ana_gvillanueva', 'bariscafe.ccs', '_byters', 'iosoyjoss_', 'alexsaulibeth', 'jesusojeda35', 'darvimhz_', 'candylovevzla', 'jesus_z21', 'mae_mazcort', 'ixicrown', 'freddy_espinel', 'deremateshoes', 'eldiezzy', 'mariocastillo3148', 'eugeniorp54', 'david.1806', 'systemline_', 'bakeryy_and_cakesshop'])
     #bot.like_posts('lucasmeloryt')
     #bot.upload_post('Desktop/kk.png', 'Somethingsomethingsomething')
     #print(bot.my_followers_num())
-    print(bot.follow_by_hashtag('#programacionvenezuela', False))
+    #print(bot.follow_by_hashtag('#programacionvenezuela', False))
     #time.sleep(1000)
 
     #bot.close()
