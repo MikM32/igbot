@@ -1108,6 +1108,8 @@ class IgBot(Browser):
             #     ver_code = ver_code.split()[0] # formatea la string del subject para obtener solo el codigo (suele estar al comienzo)
             
             mail_attempts = 1
+            prev_handle = self.browser_handler.current_window_handle
+            self.browser_handler.switch_to.window(mail_bot.whandle)
             while True:
                 self.wait('small')
                 ver_code = mail_bot.get_mail_subject('Instagram')
@@ -1115,6 +1117,7 @@ class IgBot(Browser):
                     mail_attempts += 1
                 else:
                     break
+            self.browser_handler.switch_to.window(prev_handle)
                 
             if not ver_code:
                 raise MailInstagramVerificationCodeNotFound()
