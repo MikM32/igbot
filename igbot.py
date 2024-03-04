@@ -1110,9 +1110,11 @@ class IgBot(Browser):
             code_input.send_keys(Keys.ENTER)
             self.wait('small')
 
-            locator = (By.XPATH, "//*[contains(text(), 'Activar notificaciones')]")
-            get_element(self.browser_handler, locator)
-            print('cuenta creada con exito!')
+            # locator = (By.XPATH, "//*[contains(text(), 'Activar notificaciones')]")
+            # get_element(self.browser_handler, locator)
+            self.wait('micro')
+            if 'www.instagram.com' == self.browser_handler.current_url:
+                print('cuenta creada con exito!')
 
             prev_handle = self.browser_handler.current_window_handle
             self.browser_handler.switch_to.window(mail_bot.whandle)
