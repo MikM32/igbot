@@ -1364,6 +1364,40 @@ class IgBot(Browser):
                     self.wait()
                 self.open_following_list()
 
+    def is_following_me(self, user: str) -> bool:
+        self.open_my_profile()
+        self.open_followers_list()
+
+        
+        try:
+            search_user_input = get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
+            search_user_input.send_keys(user)
+            search_user_input.send_keys(Keys.ENTER)
+
+            self.wait('search')
+            try:
+                self.browser_handler.find_element(By.XPATH, f"//span[contains(text(), '{user}')]")
+                return True
+            except:
+                pass
+            try:
+                self.browser_handler.find_element(By.XPATH, f"//div[contains(text(), '{user}')]")
+                return True
+            except:
+                pass
+            try:
+                self.browser_handler.find_element(By.XPATH, f"//a[contains(text(), '{user}')]")
+                return True
+            except:
+                pass
+        except Exception as e:
+            warning(f'no se encontro a {user}')
+            if self.check_challenge():
+                while 'challenge' in self.browser_handler.current_url:
+                    warning('Se debe resolver el captcha para poder continuar.')
+                    self.wait()
+        return False
+
     def follow_by_hashtag(self, hashtag: str, like_posts: bool, limit: int=30) -> list[str]:
         """
     #       follow_by_Hashtag(hashtag: str, limit: int) -> list[str]
