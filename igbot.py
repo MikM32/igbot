@@ -1109,7 +1109,7 @@ class IgBot(Browser):
             
             mail_attempts = 1
             while True:
-                time.sleep(10)
+                self.wait('small')
                 ver_code = mail_bot.get_mail_subject('Instagram')
                 if (ver_code is None) and (mail_attempts <= 10):
                     mail_attempts += 1
