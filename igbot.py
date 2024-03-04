@@ -1402,9 +1402,9 @@ class IgBot(Browser):
                     self.wait()
         finally:
             #locator  = (By.CSS_SELECTOR, 'svg[class="Cerrar"]')
-            close_frame = self.browser_handler.find_element(By.CSS_SELECTOR, 'svg[class="Cerrar"]')
+            close_frame = self.browser_handler.find_element(By.CSS_SELECTOR, 'svg[aria-label="Cerrar"]')
             close_frame.click()
-            
+
         return False
 
     def follow_by_hashtag(self, hashtag: str, like_posts: bool, limit: int=30) -> list[str]:
