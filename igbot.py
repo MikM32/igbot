@@ -1655,6 +1655,7 @@ class IgBot(Browser):
 
         for user in users:
             try:
+                self.wait('nano')
                                     #get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
                 search_user_input = self.browser_handler.find_element(By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]')
                 search_user_input.send_keys(user)
@@ -1672,11 +1673,17 @@ class IgBot(Browser):
                 self.wait('micro')
 
                 discard_in.click()
+
+                yield user
+
             except Exception as e:
                 warning(f'no se encontro a {user}')
                 locator = (By.CSS_SELECTOR, 'div[aria-label="Borrar búsqueda"]')
                 discard_in = get_element(self.browser_handler, locator)
                 discard_in.click()
+
+                yield user
+
                 self.wait('micro')
                 if self.check_challenge():
                     while 'challenge' in self.browser_handler.current_url:
