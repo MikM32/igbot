@@ -1115,6 +1115,8 @@ class IgBot(Browser):
             self.wait('micro')
             if 'www.instagram.com' == self.browser_handler.current_url:
                 print('cuenta creada con exito!')
+            else:
+                raise Exception
 
             prev_handle = self.browser_handler.current_window_handle
             self.browser_handler.switch_to.window(mail_bot.whandle)
