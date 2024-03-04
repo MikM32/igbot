@@ -1071,7 +1071,8 @@ class IgBot(Browser):
                 except:
                     break
             
-            time.sleep(50)
+            time.sleep(90)
+            warning('esperando a que instagram madure: 1.3 min')
 
             prev_handle = self.browser_handler.current_window_handle
             self.browser_handler.switch_to.window(mail_bot.whandle)
@@ -1101,7 +1102,7 @@ class IgBot(Browser):
             code_input = get_element(self.browser_handler, locator)
             code_input.click()
 
-            self.wait('micro')
+            self.wait('small')
             
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_ACTIVE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
