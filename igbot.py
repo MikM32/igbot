@@ -508,7 +508,7 @@ class UrbanVpn(Browser):
             countries_list = get_elements(self.browser_handler, c_locator)
 
             curelement = None
-            country = secrets.choice(['United States (USA)', 'Argentina', 'Colombia']) #'Australia', 'Canada', 'Germany','United Kingdom'])
+            country = secrets.choice(['United States (USA)']) #'Australia', 'Canada', 'Germany','United Kingdom'])
             for element in countries_list:
                 self.browser_handler.execute_script("arguments[0].scrollIntoView();", element)
                 #print(element.text)
@@ -528,7 +528,7 @@ class UrbanVpn(Browser):
             locator = (By.CLASS_NAME, 'loader loader--animated primary-layout__loader')
             WebDriverWait(self.browser_handler, WAIT_MAX).until_not(EC.presence_of_element_located(locator))
             self.__is_active = True
-            self.wait('micro')
+            self.wait('small')
             #print('listo')
         except TimeoutException as e:
             warning('No se encontraron elementos necesarios para activar el vpn')
@@ -540,7 +540,7 @@ class UrbanVpn(Browser):
         elif not self.__is_in_page:
             raise PageNotLoaded(URBAN_VPN_LINK)
 
-        self.wait('nano')
+        self.wait('micro')
         #stop_button = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located((By.CLASS_NAME, 'play-button--pause')))
         stop_button = get_element(self.browser_handler, (By.CLASS_NAME, 'play-button--pause'))
         stop_button.click()
@@ -1065,25 +1065,28 @@ class IgBot(Browser):
 
             prev_handle = self.browser_handler.current_window_handle
             self.browser_handler.switch_to.window(mail_bot.whandle)
+            time.sleep(7.2)
             ver_code = mail_bot.get_mail_subject('Instagram') # Obtiene el subject del correo con el codigo de verificacion de instagram
+            time.sleep(3)
             self.browser_handler.switch_to.window(prev_handle)
             #self.active_window()
 
             ver_code = ver_code.split()[0] # formatea la string del subject para obtener solo el codigo (suele estar al comienzo)
-            print(ver_code)
+            print(f'codigo de verificacion: {ver_code}')
 
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
             code_input.click()
 
+            self.wait('micro')
             
             locator = (By.CSS_SELECTOR, f'input[class="{VER_CODE_ACTIVE_INPUT}"]')
             code_input = get_element(self.browser_handler, locator)
             code_input.send_keys(ver_code)
-            self.wait('small')
             code_input.send_keys(Keys.ENTER)
+            self.wait('small')
 
-            locator = (By.XPATH, "//*[contains(text(), 'Sugerencias para ti')]")
+            locator = (By.XPATH, "//*[contains(text(), 'Activar notificaciones')]")
             get_element(self.browser_handler, locator)
             print('cuenta creada con exito!')
 
@@ -1108,7 +1111,7 @@ class IgBot(Browser):
                 self.register(email, name, pwd, birth)
             return (False, maildata)
 
-    def create_new_account(self) -> tuple[str]:
+    def create_new_account(self) -> tuple:
 
         return self.register(gen_email(), gen_name(), gen_pwd(), gen_birth())
 
