@@ -1076,7 +1076,7 @@ class IgBot(Browser):
             get_element(self.browser_handler, locator)
             while True:
                 try:                                               #//*[contains(text(), 'aptcha')]
-                    self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'reCAPTCHA')]")
+                    self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'Registrarte con tu número de')]")
                     warning('Debe resolver el captcha para poder continuar con la verificacion')
                     if self.is_headless:
                         self.show_window()
