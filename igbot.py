@@ -1076,9 +1076,11 @@ class IgBot(Browser):
                 try:
                     self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'aptcha')]")
                     warning('Debe resolver el captcha para poder continuar')
-                    self.show_window()
+                    if self.is_headless:
+                        self.show_window()
                 except:
-                    self.hide_window()
+                    if self.is_headless:
+                        self.hide_window()
                     break
             
             time.sleep(30)
