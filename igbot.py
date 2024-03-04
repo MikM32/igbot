@@ -1338,6 +1338,7 @@ class IgBot(Browser):
             #WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
             get_element(self.browser_handler, locator)
 
+            locator = (By.XPATH , "//li[contains(text(), 'seguidores')]")
             followers_link = self.browser_handler.find_element(By.CSS_SELECTOR, f'li[class="{AC_FOLLOWERS_LINK_CLASSES}"]:nth-child(2)')
             followers_link.click()
         except TimeoutException:
@@ -1357,8 +1358,9 @@ class IgBot(Browser):
             #WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_element_located(locator))
             get_element(self.browser_handler, locator)
 
-            #locator = (By.CSS_SELECTOR, f'li[class="{AC_FOLLOWERS_LINK_CLASSES}"]:nth-child(3)')
-            locator = (By.XPATH, "//li[contains(text(), 'seguidos')]")
+
+            locator = (By.CSS_SELECTOR, f'li[class="{AC_FOLLOWERS_LINK_CLASSES}"]:nth-child(3)')
+            #locator = (By.XPATH, "//li[contains(text(), 'seguidos')]")
             followers_link = get_element(self.browser_handler, locator)
             followers_link.click()
         except TimeoutException:
