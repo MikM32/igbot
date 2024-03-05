@@ -1727,6 +1727,27 @@ class IgBot(Browser):
             #     close_frame = self.browser_handler.find_element(By.CSS_SELECTOR, 'svg[aria-label="Cerrar"]')
             #     close_frame.click()
 
+    def unfollow_users_by_web(self, users:list):
+
+        for user in users:
+
+            self.browser_handler.get(IG_URL+f'/{user}')
+            self.wait('micro')
+
+            try:
+                #locator = (By.XPATH, "//div[contains(text(), 'Siguiendo')]")
+                menu_bt = self.browser_handler.find_element(By.XPATH, "//div[contains(text(), 'Siguiendo')]")
+                menu_bt.click()
+
+                self.wait('micro')
+
+                locator = (By.XPATH, "//span[contains(text(), 'Dejar de seguir')]")
+                unfollow_bt = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.visibility_of_element_located(locator))
+                unfollow_bt.click()
+                yield user
+            except:
+                warning(f'No puede dejar de seguir porque no esta siguiendo al usuario: {user}.')
+                yield user
 
 
     def upload_post(self, post_img_path: str, post_txt: str=''):
