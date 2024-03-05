@@ -1218,7 +1218,7 @@ class IgBot(Browser):
         return self.register(gen_email(), gen_name(), gen_pwd(), gen_birth())
 
 
-    def login(self, sv_cookies: bool=False, accept_nt: bool=False):
+    def login(self, sv_cookies: bool=True, accept_nt: bool=False):
 
         if not self.__is_in_page:
             raise PageNotLoaded(IG_URL)
@@ -1589,7 +1589,18 @@ class IgBot(Browser):
                     self.wait()
                 self.like_posts(user, limit)
 
-        #---------- En desarrollo ----------
+    
+    def like_post(self, post_url:str):
+        self.wait('micro')
+        self.browser_handler.get(post_url)
+        self.wait('micro')
+
+        try:
+            like_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, 'svg[aria-label="Me gusta"]'))
+            like_bt.click()
+            self.wait('micro')
+        except:
+            warning('No se puede dar like al post porque no se encontro el boton de like.')
 
 
     def _update_follow_list(self, follow_box):
@@ -1882,7 +1893,7 @@ def main():
     #proton.register("ayahuasca3240", "987659821.")
     #print(proton.create_new_account())
     bot = IgBot(use_vpn=False)
-    bot.set_username('darkm31')
+    #bot.set_username('darkm31')
     #bot.pwd = 'password'
 
     #bot.init_browser_handler()
@@ -1892,14 +1903,14 @@ def main():
     #bot.close()
     bot.init_cfg()
     bot.init_ig()
-    #print(bot.create_new_account())
+    print(bot.create_new_account())
     #bot.register(gen_email(), gen_name(), 'wasridss2', gen_pwd(), gen_birth())
     #bot.wait('micro')
     #bot.show_window()
     #bot.accept_notifications(False)
     #bot.comment_post('https://www.instagram.com/p/C3tRu41pVEE/', '.')
-    for i in bot.unfollow_users(['stefan_codes', 'arelis_reyes19', 'alexandra_h593', 'yolandavirgilianoguera', 'ayfdeveloper', 'operadely', 'devcaress', 's.gr_______', 'misspatryc', 'codigobits', 'tatianna.testing', 'escafe_ve', 'ana_gvillanueva', 'bariscafe.ccs', '_byters', 'iosoyjoss_', 'alexsaulibeth', 'jesusojeda35', 'darvimhz_', 'candylovevzla', 'jesus_z21', 'mae_mazcort', 'ixicrown', 'freddy_espinel', 'deremateshoes', 'eldiezzy', 'mariocastillo3148', 'eugeniorp54', 'david.1806', 'systemline_', 'bakeryy_and_cakesshop']):
-        print(i)
+    # for i in bot.unfollow_users(['stefan_codes', 'arelis_reyes19', 'alexandra_h593', 'yolandavirgilianoguera', 'ayfdeveloper', 'operadely', 'devcaress', 's.gr_______', 'misspatryc', 'codigobits', 'tatianna.testing', 'escafe_ve', 'ana_gvillanueva', 'bariscafe.ccs', '_byters', 'iosoyjoss_', 'alexsaulibeth', 'jesusojeda35', 'darvimhz_', 'candylovevzla', 'jesus_z21', 'mae_mazcort', 'ixicrown', 'freddy_espinel', 'deremateshoes', 'eldiezzy', 'mariocastillo3148', 'eugeniorp54', 'david.1806', 'systemline_', 'bakeryy_and_cakesshop']):
+    #     print(i)
     #bot.like_posts('lucasmeloryt')
     #print(bot.is_following_me('rippoio'))
     #bot.upload_post('C:/Users/Ines/Desktop/modsd.png', 'juas')
