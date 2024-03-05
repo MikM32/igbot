@@ -1730,7 +1730,7 @@ class IgBot(Browser):
     def unfollow_users_by_web(self, users:list):
 
         for user in users:
-
+            self.wait('micro')
             self.browser_handler.get(IG_URL+f'/{user}')
             self.wait('micro')
 
@@ -1748,6 +1748,7 @@ class IgBot(Browser):
             except:
                 warning(f'No puede dejar de seguir porque no esta siguiendo al usuario: {user}.')
                 yield user
+
 
 
     def upload_post(self, post_img_path: str, post_txt: str=''):
