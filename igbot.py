@@ -1664,14 +1664,14 @@ class IgBot(Browser):
         for user in users:
             #self.open_following_list()
             try:
+                self.wait('small')
                                     #get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
                 search_user_input = self.browser_handler.find_element(By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]')
-                self.wait('small')
+                #self.wait('small')
+                search_user_input.click()
+                search_user_input = self.browser_handler.find_element(By.CSS_SELECTOR, 'input[data-focus-visible-added]')
                 search_user_input.send_keys(user)
                 search_user_input.send_keys(Keys.ENTER)
-
-                locator = (By.CSS_SELECTOR, 'div[aria-label="Borrar búsqueda"]')
-                discard_in = get_element(self.browser_handler, locator)
 
                 # self.wait('small')
                 # unfollow_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]'))
@@ -1682,8 +1682,11 @@ class IgBot(Browser):
                 # self.wait('small')
 
                 try:
-                    user_b = self.browser_handler.find_element(By.XPATH, f"//div[contains(text(), '{user}')]")
-                    unfollow_bt = user_b.find_element(By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]')
+                    #user_span = self.browser_handler.find_element(By.XPATH, f"//span[contains(text(), '{user}')]")
+                    ancestors = self.browser_handler.find_elements(By.XPATH, f"//span[contains(text(), '{user}')]/ancestor::div")
+
+                    unfollow_bt = ancestors[14].find_element(By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]')
+                    #unfollow_bt = user_b.find_element(By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]')
                     unfollow_bt.click()
                     self.wait('micro')
 
@@ -1694,15 +1697,23 @@ class IgBot(Browser):
                 except:
                     raise Exception
 
+                locator = (By.CSS_SELECTOR, 'div[aria-label="Borrar búsqueda"]')
+                discard_in = get_element(self.browser_handler, locator)
                 discard_in.click()
 
                 yield user
 
             except Exception as e:
+                self.wait('micro')
                 warning(f'no se encontro a {user}')
                 locator = (By.CSS_SELECTOR, 'div[aria-label="Borrar búsqueda"]')
                 discard_in = get_element(self.browser_handler, locator)
                 discard_in.click()
+                # try:
+                #     discard_in.click()
+                # except:
+                #     discard_in = get_element(self.browser_handler, locator)
+                #     discard_in.click()
 
                 yield user
 
@@ -1865,9 +1876,10 @@ def main():
     #bot.show_window()
     #bot.accept_notifications(False)
     #bot.comment_post('https://www.instagram.com/p/C3tRu41pVEE/', '.')
-    #bot.unfollow_users(['stefan_codes', 'arelis_reyes19', 'alexandra_h593', 'yolandavirgilianoguera', 'ayfdeveloper', 'operadely', 'devcaress', 's.gr_______', 'misspatryc', 'codigobits', 'tatianna.testing', 'escafe_ve', 'ana_gvillanueva', 'bariscafe.ccs', '_byters', 'iosoyjoss_', 'alexsaulibeth', 'jesusojeda35', 'darvimhz_', 'candylovevzla', 'jesus_z21', 'mae_mazcort', 'ixicrown', 'freddy_espinel', 'deremateshoes', 'eldiezzy', 'mariocastillo3148', 'eugeniorp54', 'david.1806', 'systemline_', 'bakeryy_and_cakesshop'])
+    for i in bot.unfollow_users(['stefan_codes', 'arelis_reyes19', 'alexandra_h593', 'yolandavirgilianoguera', 'ayfdeveloper', 'operadely', 'devcaress', 's.gr_______', 'misspatryc', 'codigobits', 'tatianna.testing', 'escafe_ve', 'ana_gvillanueva', 'bariscafe.ccs', '_byters', 'iosoyjoss_', 'alexsaulibeth', 'jesusojeda35', 'darvimhz_', 'candylovevzla', 'jesus_z21', 'mae_mazcort', 'ixicrown', 'freddy_espinel', 'deremateshoes', 'eldiezzy', 'mariocastillo3148', 'eugeniorp54', 'david.1806', 'systemline_', 'bakeryy_and_cakesshop']):
+        print(i)
     #bot.like_posts('lucasmeloryt')
-    print(bot.is_following_me('rippoio'))
+    #print(bot.is_following_me('rippoio'))
     #bot.upload_post('C:/Users/Ines/Desktop/modsd.png', 'juas')
     #print(bot.my_followers_num())
     #print(bot.follow_by_hashtag('#programacionvenezuela', False))
