@@ -1673,13 +1673,26 @@ class IgBot(Browser):
                 locator = (By.CSS_SELECTOR, 'div[aria-label="Borrar búsqueda"]')
                 discard_in = get_element(self.browser_handler, locator)
 
-                self.wait('small')
-                unfollow_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]'))
-                unfollow_bt.click()
-                self.wait('small')
-                accept_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{ACCEPT_UNFOLLOW}"]'))
-                accept_bt.click()
-                self.wait('small')
+                # self.wait('small')
+                # unfollow_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]'))
+                # unfollow_bt.click()
+                # self.wait('small')
+                # accept_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{ACCEPT_UNFOLLOW}"]'))
+                # accept_bt.click()
+                # self.wait('small')
+
+                try:
+                    user_b = self.browser_handler.find_element(By.XPATH, f"//div[contains(text(), '{user}')]")
+                    unfollow_bt = user_b.find_element(By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]')
+                    unfollow_bt.click()
+                    self.wait('micro')
+
+                    accept_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{ACCEPT_UNFOLLOW}"]'))
+                    accept_bt.click()
+                    self.wait('small')
+
+                except:
+                    raise Exception
 
                 discard_in.click()
 
