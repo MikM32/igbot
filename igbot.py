@@ -1408,6 +1408,19 @@ class IgBot(Browser):
             close_frame.click()
 
         return False
+    def follow(self, account: str):
+        self.wait('micro')
+        self.browser_handler.get(IG_URL+f'/{account}')
+        self.wait('micro')
+
+        try:
+            #locator = (By.XPATH, "//div[contains(text(), 'Siguiendo')]")
+            menu_bt = self.browser_handler.find_element(By.XPATH, "//div[contains(text(), 'Seguir')]")
+            menu_bt.click()
+
+            self.wait('micro')
+        except:
+            warning('No se pudo seguir a la cuenta')
 
     def follow_by_hashtag(self, hashtag: str, like_posts: bool, limit: int=30) -> list[str]:
         """
