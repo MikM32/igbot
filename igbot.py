@@ -1659,27 +1659,27 @@ class IgBot(Browser):
         Esta funcion deja de seguir una lista de usuarios (users: list[str])
         """
         self.open_my_profile()
-        #self.open_following_list()
+        self.open_following_list()
 
         for user in users:
-            self.open_following_list()
+            #self.open_following_list()
             try:
-                self.wait('nano')
                                     #get_element(self.browser_handler, (By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]'))
                 search_user_input = self.browser_handler.find_element(By.CSS_SELECTOR, 'input[aria-label="Buscar entrada"]')
+                self.wait('small')
                 search_user_input.send_keys(user)
                 search_user_input.send_keys(Keys.ENTER)
 
                 locator = (By.CSS_SELECTOR, 'div[aria-label="Borrar búsqueda"]')
                 discard_in = get_element(self.browser_handler, locator)
 
-                self.wait('micro')
+                self.wait('small')
                 unfollow_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{UNFOLLOW_BT}"]'))
                 unfollow_bt.click()
-                self.wait('micro')
+                self.wait('small')
                 accept_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, f'button[class="{ACCEPT_UNFOLLOW}"]'))
                 accept_bt.click()
-                self.wait('micro')
+                self.wait('small')
 
                 discard_in.click()
 
@@ -1699,9 +1699,9 @@ class IgBot(Browser):
                         warning('Se debe resolver el captcha para poder continuar.')
                         self.wait()
                     self.unfollow_users(users)
-            finally:
-                close_frame = self.browser_handler.find_element(By.CSS_SELECTOR, 'svg[aria-label="Cerrar"]')
-                close_frame.click()
+            # finally:
+            #     close_frame = self.browser_handler.find_element(By.CSS_SELECTOR, 'svg[aria-label="Cerrar"]')
+            #     close_frame.click()
 
 
 
