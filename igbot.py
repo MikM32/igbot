@@ -1837,8 +1837,9 @@ class IgBot(Browser):
         """
 
         #prev_url = self.browser_handler.current_url
+        self.wait('micro')
         self.browser_handler.get(post_url)
-        self.wait('nano')
+        self.wait('micro')
         try:
             #Presiona el cuadro de texto para activarlo
             locator = (By.CSS_SELECTOR, f'textarea[class="{OFF_COMMENT_TEXT}"]')
@@ -1849,11 +1850,13 @@ class IgBot(Browser):
             locator = (By.CSS_SELECTOR, f'textarea[class="{ON_COMMENT_TEXT}"]')
             comment_input = get_element(self.browser_handler, locator)
             comment_input.send_keys(comment_txt)
+            self.wait('micro')
 
             #Y luego se presiona el boton de publicar
             locator = (By.CSS_SELECTOR, f"div[class={SEND_COMMENT_BT}]")
             comment_bt = get_element(self.browser_handler, locator)
             comment_bt.click()
+            self.wait('micro')
         except StaleElementReferenceException:
             warning('No se activo el cuadro de texto y por lo tanto no se puede escribir el comentario')
         except TimeoutException:
