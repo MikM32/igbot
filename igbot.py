@@ -1262,7 +1262,8 @@ class IgBot(Browser):
         self._check_login("No se pueden buscar cuentas si no se ha iniciado sesion con una cuenta previamente.")
 
         try:
-            search_button = self.browser_handler.find_element(By.CSS_SELECTOR, 'svg[aria-label="Búsqueda"]')
+            #search_button = self.browser_handler.find_element(By.CSS_SELECTOR, 'svg[aria-label="Búsqueda"]')
+            search_button = get_element(self.browser_handler, (By.CSS_SELECTOR, 'svg[aria-label="Búsqueda"]'))
             search_button.click()
 
         except NoSuchElementException as e:
@@ -1448,10 +1449,11 @@ class IgBot(Browser):
         #if not self.is_logged:
         #    raise NoLoggedSession('No se puede buscar cuentas por hashtag si no se ha iniciado sesion con una cuenta previamente.')
 
-        self.search_for(hashtag)
+        #self.search_for(hashtag)
         self.wait('micro')
 
-        #self.browser_handler.get(IG_EXPLORE_TAG+hashtag)
+        self.browser_handler.get(IG_EXPLORE_TAG+hashtag)
+        self.wait('micro')
         #Verifica si hay resultados para el hashtag ingresado
         try:
             #self.browser_handler.find_element(By.XPATH, "//span[contains(text(),'{}')]".format(NOT_FOUND_MSG))
@@ -1611,10 +1613,11 @@ class IgBot(Browser):
         try:
             locator = (By.CSS_SELECTOR, 'div[class="x6s0dn4 xrvj5dj x1o61qjw"]')
             post_like_zone = get_element(self.browser_handler, locator)
-            like_bt = post_like_zone.find_element(By.CSS_SELECTOR, 'svg[aria-label="Me gusta"]')
 
-            #like_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, 'svg[aria-label="Me gusta"]'))
+            like_bt = post_like_zone.find_element(By.CSS_SELECTOR, 'svg[aria-label="Me gusta"]')
             like_bt.click()
+            #like_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, 'svg[aria-label="Me gusta"]'))
+            
             self.wait('micro')
         except:
             warning('No se puede dar like al post porque no se encontro el boton de like.')
