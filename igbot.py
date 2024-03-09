@@ -1609,7 +1609,11 @@ class IgBot(Browser):
         self.wait('micro')
 
         try:
-            like_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, 'svg[aria-label="Me gusta"]'))
+            locator = (By.CSS_SELECTOR, 'div[class="x6s0dn4 xrvj5dj x1o61qjw"]')
+            post_like_zone = get_element(self.browser_handler, locator)
+            like_bt = post_like_zone.find_element(By.CSS_SELECTOR, 'svg[aria-label="Me gusta"]')
+
+            #like_bt = get_element(self.browser_handler, (By.CSS_SELECTOR, 'svg[aria-label="Me gusta"]'))
             like_bt.click()
             self.wait('micro')
         except:
@@ -1909,7 +1913,7 @@ def main():
     #proton.register("ayahuasca3240", "987659821.")
     #print(proton.create_new_account())
     bot = IgBot(use_vpn=False)
-    #bot.set_username('darkm31')
+    bot.set_username('darkm31')
     #bot.pwd = 'password'
 
     #bot.init_browser_handler()
@@ -1919,11 +1923,12 @@ def main():
     #bot.close()
     bot.init_cfg()
     bot.init_ig()
-    print(bot.create_new_account())
+    #print(bot.create_new_account())
     #bot.register(gen_email(), gen_name(), 'wasridss2', gen_pwd(), gen_birth())
     #bot.wait('micro')
     #bot.show_window()
     #bot.accept_notifications(False)
+    bot.like_post('https://www.instagram.com/p/C4Rs1VStjSm/')
     #bot.comment_post('https://www.instagram.com/p/C3tRu41pVEE/', '.')
     # for i in bot.unfollow_users(['stefan_codes', 'arelis_reyes19', 'alexandra_h593', 'yolandavirgilianoguera', 'ayfdeveloper', 'operadely', 'devcaress', 's.gr_______', 'misspatryc', 'codigobits', 'tatianna.testing', 'escafe_ve', 'ana_gvillanueva', 'bariscafe.ccs', '_byters', 'iosoyjoss_', 'alexsaulibeth', 'jesusojeda35', 'darvimhz_', 'candylovevzla', 'jesus_z21', 'mae_mazcort', 'ixicrown', 'freddy_espinel', 'deremateshoes', 'eldiezzy', 'mariocastillo3148', 'eugeniorp54', 'david.1806', 'systemline_', 'bakeryy_and_cakesshop']):
     #     print(i)
