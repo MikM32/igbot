@@ -1196,6 +1196,16 @@ class IgBot(Browser):
             self.browser_handler.switch_to.window(mail_bot.whandle)
             self.browser_handler.close()
             self.browser_handler.switch_to.window(prev_handle)
+            self.logout()
+
+            self.browser_handler.switch_to.new_window("log")
+            self.wait('small')
+            self.browser_handler.get(IG_URL)
+            self.wait('micro')
+
+            self.set_username(maildata[0])
+            self.set_pwd(maildata[1])
+            self.login()
 
             return (True, maildata)
 
