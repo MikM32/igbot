@@ -1340,8 +1340,8 @@ class IgBot(Browser):
     def close(self):
         try:
             self.logout()
-        except NoLoggedSession:
-            warning('close(): no hay una sesion abierta')
+        except NoLoggedSession as e:
+            warning(f'close(): {e.msg}')
             pass
         #prev_handle = self.browser_handler.current_window_handle
         self.vpn.switch_to_vpn()
@@ -1513,6 +1513,7 @@ class IgBot(Browser):
             # self.wait('micro')
             # cols[j].click()
 
+            #xpath al div del primer post de la matriz de posts del hashtag
             locator = (By.XPATH, "/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/article/div/div/div/div")
             post_link = get_clickable_element(self.browser_handler, locator)
             #post_link = cols[j].find_element(By.TAG_NAME, 'a')
@@ -1933,11 +1934,15 @@ class IgBot(Browser):
 
     def check_ban(self) -> bool:
 
-        try:
-            self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'inhabilitaremos tu cuenta permanentemente')]")
+        # try:
+        #     self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'inhabilitaremos tu cuenta permanentemente')]")
+        #     return True
+        # except NoSuchElementException as e:
+        #     return False
+        if 'suspended' in self.browser_handler.current_url:
             return True
-        except NoSuchElementException as e:
-            return False
+        
+        return False
 
     def _check_login(self, admsg:str=''):
         if not self.is_logged:
