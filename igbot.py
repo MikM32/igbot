@@ -1929,6 +1929,14 @@ class IgBot(Browser):
 
         return False
 
+    def check_ban(self) -> bool:
+
+        try:
+            self.browser_handler.find_element(By.XPATH, "//*[contains(text(), 'inhabilitaremos tu cuenta permanentemente')]")
+            return True
+        except NoSuchElementException as e:
+            return False
+
     def _check_login(self, admsg:str=''):
         if not self.is_logged:
             raise NoLoggedSession(admsg)
