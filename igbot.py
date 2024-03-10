@@ -431,6 +431,9 @@ class Browser:
         try:
             os.kill(bhandler_pid, signal.SIGTERM)
             print("La ventana del chromedriver tuvo que ser asesinada... xd")
+        except PermissionError as e:
+            warning('close_browser_handler(): no se puede matar al proceso por falta de permisos de administrador.')
+            pass
         except ProcessLookupError as e:
             pass
 
