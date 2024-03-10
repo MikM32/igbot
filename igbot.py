@@ -1205,11 +1205,13 @@ class IgBot(Browser):
             self.browser_handler.switch_to.window(mail_bot.whandle)
             self.browser_handler.close()
             self.browser_handler.switch_to.window(prev_handle)
-            self.logout()
+            
+            #self.delete_cookies()
 
             self.browser_handler.switch_to.new_window("log")
             self.wait('small')
             self.browser_handler.get(IG_URL)
+            self.logout()
             self.wait('micro')
 
             self.set_username(maildata[0])
@@ -1950,7 +1952,9 @@ def main():
     #bot.wait('micro')
     #bot.show_window()
     #bot.accept_notifications(False)
-    bot.like_post('https://www.instagram.com/p/C4Rs1VStjSm/')
+    bot.wait('micro')
+    bot.logout()
+    #bot.like_post('https://www.instagram.com/p/C4Rs1VStjSm/')
     #bot.comment_post('https://www.instagram.com/p/C3tRu41pVEE/', '.')
     # for i in bot.unfollow_users(['stefan_codes', 'arelis_reyes19', 'alexandra_h593', 'yolandavirgilianoguera', 'ayfdeveloper', 'operadely', 'devcaress', 's.gr_______', 'misspatryc', 'codigobits', 'tatianna.testing', 'escafe_ve', 'ana_gvillanueva', 'bariscafe.ccs', '_byters', 'iosoyjoss_', 'alexsaulibeth', 'jesusojeda35', 'darvimhz_', 'candylovevzla', 'jesus_z21', 'mae_mazcort', 'ixicrown', 'freddy_espinel', 'deremateshoes', 'eldiezzy', 'mariocastillo3148', 'eugeniorp54', 'david.1806', 'systemline_', 'bakeryy_and_cakesshop']):
     #     print(i)
