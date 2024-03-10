@@ -1214,7 +1214,7 @@ class IgBot(Browser):
             
             #self.delete_cookies()
 
-            self.browser_handler.switch_to.new_window("log")
+            #self.browser_handler.switch_to.new_window("log")
             self.wait('small')
             self.browser_handler.get(IG_URL)
             self.logout()
