@@ -233,7 +233,7 @@ class Browser:
         self.options.add_argument('--log-level=3')
         self.options.add_argument('--disable-notifications')
         self.options.add_argument('--no-default-browser-check')
-        self.options.add_argument('--disable-notifications')
+        self.options.add_argument('--disable-blink-features=AutomationControlled')
         self.options.add_argument(f'--profile-directory=Default')
         #else:
         #    self.options.add_argument(f'--args')
@@ -243,7 +243,8 @@ class Browser:
 
         #Este parametro evita que aparezca el mensaje "Un software automatizado esta controlando chrome"
         self.options.add_experimental_option('excludeSwitches', ["enable-automation", "enable-logging"])
-        preferencias = {"profile.default_content_setting_values.notifications" : 2} # 0=preguntar , 1=permitir, 2= no permitir
+        preferencias = {"profile.default_content_setting_values.notifications" : 2, # 0=preguntar , 1=permitir, 2= no permitir
+                        "credentials_enable_service": False} #desactiva la pregunta de si se quiere guardar la contraseña al loguearse
         self.options.add_experimental_option('prefs', preferencias)
 
         #Este parametro permite que la ventana del navegador permanezca abierta aun despues de haber realizado alguna tarea.
@@ -1203,6 +1204,8 @@ class IgBot(Browser):
                         print('cuenta creada con exito!')
                     else:
                         raise InstagramVerificationCodeBackendError()
+            
+            self.is_logged = True
 
             prev_handle = self.browser_handler.current_window_handle
             self.browser_handler.switch_to.window(mail_bot.whandle)
