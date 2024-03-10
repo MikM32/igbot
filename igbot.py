@@ -13,6 +13,7 @@
 
 import time
 import os, sys
+import signal
 import secrets
 
 from selenium import webdriver
@@ -424,6 +425,14 @@ class Browser:
             raise NotInitizalizedHandler()
 
         self.browser_handler.quit()
+
+        bhandler_pid = self.browser_handler.service.process.pid
+
+        try:
+            os.kill(bhandler_pid, signal.SIGTERM)
+            print("La ventana del chromedriver tuvo que ser asesinada... xd")
+        except ProcessLookupError as e:
+            pass
 
 #<------------------------------><------------------------------><------------------------------>
 class UrbanVpn(Browser):
