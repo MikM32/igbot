@@ -1491,22 +1491,30 @@ class IgBot(Browser):
         account_users = []
 
         try:
-
+            self.wait('micro')
             #rows_locator = (By.CSS_SELECTOR, 'div[class="_ac7v  _al3n"]')
             #rows_locator = (By.CSS_SELECTOR, f'div[class="{ROW_CLS}"]')
-            rows_locator = (By.XPATH, '//*[@id="mount_0_0_2I"]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/article/div/div/div/div[1]')
+            rows_locator = (By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/article/div/div/div/div')
             #rows = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(rows_locator))
+            #base_locator = get_element(self.browser_handler, base_locator)
+            
             rows = get_elements(self.browser_handler, rows_locator)
-            i = secrets.randbelow(len(rows)//2)
+            print(len(rows))
+            i = secrets.randbelow(len(rows))
+            self.wait('micro')
 
             #cols_locator = (By.CSS_SELECTOR, 'div[class="_aabd _aa8k  _al3l"]')
             #cols = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(cols_locator))
             #cols = rows[i].find_elements(By.CSS_SELECTOR, f'div[class="{COLOM_CLS}"]')
             cols = rows[i].find_elements(By.TAG_NAME, 'div')
-            j = secrets.randbelow(len(cols)//2)
+            print(len(cols))
+            j = secrets.randbelow(len(cols))
 
-            post_link = cols[j].find_element(By.TAG_NAME, 'a')
-            post_link.click()
+            self.wait('micro')
+            cols[j].click()
+
+            #post_link = cols[j].find_element(By.TAG_NAME, 'a')
+            #post_link.click()
         except Exception as e:
             warning(f'follow_by_hashtag(): no se encuentran las filas de la matriz de posts.: {e}')
             if self.check_challenge():
@@ -1955,8 +1963,6 @@ def main():
     #bot.wait('micro')
     #bot.show_window()
     #bot.accept_notifications(False)
-    bot.wait('micro')
-    bot.logout()
     #bot.like_post('https://www.instagram.com/p/C4Rs1VStjSm/')
     #bot.comment_post('https://www.instagram.com/p/C3tRu41pVEE/', '.')
     # for i in bot.unfollow_users(['stefan_codes', 'arelis_reyes19', 'alexandra_h593', 'yolandavirgilianoguera', 'ayfdeveloper', 'operadely', 'devcaress', 's.gr_______', 'misspatryc', 'codigobits', 'tatianna.testing', 'escafe_ve', 'ana_gvillanueva', 'bariscafe.ccs', '_byters', 'iosoyjoss_', 'alexsaulibeth', 'jesusojeda35', 'darvimhz_', 'candylovevzla', 'jesus_z21', 'mae_mazcort', 'ixicrown', 'freddy_espinel', 'deremateshoes', 'eldiezzy', 'mariocastillo3148', 'eugeniorp54', 'david.1806', 'systemline_', 'bakeryy_and_cakesshop']):
@@ -1965,7 +1971,7 @@ def main():
     #print(bot.is_following_me('rippoio'))
     #bot.upload_post('C:/Users/Ines/Desktop/modsd.png', 'juas')
     #print(bot.my_followers_num())
-    #print(bot.follow_by_hashtag('#programacionvenezuela', False))
+    print(bot.follow_by_hashtag('programacionvenezuela', False))
     #time.sleep(1000)
 
     #bot.close()
