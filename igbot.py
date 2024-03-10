@@ -1220,7 +1220,7 @@ class IgBot(Browser):
             self.logout()
             self.wait('micro')
 
-            self.set_username(maildata[0])
+            self.set_username(maildata[0]+'@proton.me')
             self.set_pwd(maildata[1])
             self.login()
 
