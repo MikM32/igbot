@@ -1492,14 +1492,15 @@ class IgBot(Browser):
 
         try:
 
-            rows_locator = (By.CSS_SELECTOR, 'div[class="_ac7v  _al3n"]')
+            #rows_locator = (By.CSS_SELECTOR, 'div[class="_ac7v  _al3n"]')
+            rows_locator = (By.CSS_SELECTOR, f'div[class="{ROW_CLS}"]')
             #rows = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(rows_locator))
             rows = get_elements(self.browser_handler, rows_locator)
             i = secrets.randbelow(len(rows)-1)
 
             #cols_locator = (By.CSS_SELECTOR, 'div[class="_aabd _aa8k  _al3l"]')
             #cols = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(cols_locator))
-            cols = rows[i].find_elements(By.CSS_SELECTOR, 'div[class="_aabd _aa8k  _al3l"]')
+            cols = rows[i].find_elements(By.CSS_SELECTOR, f'div[class="{COLOM_CLS}"]')
             j = secrets.randbelow(len(cols)-1)
 
             post_link = cols[j].find_element(By.TAG_NAME, 'a')

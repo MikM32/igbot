@@ -149,3 +149,6 @@ REG_NEXT_BT = ' _acan _acap _acaq _acas _aj1- _ap30'
 VER_CODE_INPUT = '_aaie _aaic _ag7n'
 VER_CODE_ACTIVE_INPUT = '_aaie _aaif _aaic _ag7n'
 GEN_USER_BT = ' _acan _acao _acas _aj1- _ap30'
+
+ROW_CLS = '_ac7v xzboxd6 x11ulueq x1f01sob xwq5r7b xcghwft'
+COLOM_CLS = 'x1lliihq x1n2onr6 xh8yej3 x4gyw5p x2pgyrj x56m6dy x1ntc13c xn45foy x9i3mqj'
