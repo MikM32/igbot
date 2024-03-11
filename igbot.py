@@ -1572,7 +1572,7 @@ class IgBot(Browser):
                 #self._update_follow_list(followers_box)
                 #followers_list = WebDriverWait(self.browser_handler, WAIT_MAX).until(EC.presence_of_all_elements_located(locator))
                 followers_list = get_elements(self.browser_handler, locator)
-                #last_user = followers_list[-1]
+                last_user = followers_list[-1]
                 self.browser_handler.execute_script("arguments[0].scrollIntoView();",last_user)
 
                 followers_len = len(followers_list)
@@ -1587,6 +1587,7 @@ class IgBot(Browser):
                 #     attempt+=1
                 # else:
                 #     prev_len = followers_len
+
 
             cont = 0
             for account in account_list:
