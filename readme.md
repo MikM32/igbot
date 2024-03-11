@@ -1,8 +1,8 @@
 # IgBot
 
-**Estado del bot:** *_Pre-release._*
+**Estado del bot:** *Listo*
 
-**_Version_: 1.0.85** 
+**_Version_: 1.0.169** 
 
 **Funciones de la api:**
 - Iniciar sesión con una cuenta de instagram. :white_check_mark:
