@@ -1437,16 +1437,17 @@ class IgBot(Browser):
 
         return False
     def follow(self, account: str):
-        self.wait('micro')
+        self.wait('small')
         self.browser_handler.get(IG_URL+f'/{account}')
-        self.wait('micro')
+        self.wait('small')
 
         try:
+            self.wait('small')
             #locator = (By.XPATH, "//div[contains(text(), 'Siguiendo')]")
             menu_bt = self.browser_handler.find_element(By.XPATH, "//div[contains(text(), 'Seguir')]")
             menu_bt.click()
 
-            self.wait('micro')
+            self.wait('small')
         except:
             warning('No se pudo seguir a la cuenta')
 
