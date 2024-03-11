@@ -1576,17 +1576,17 @@ class IgBot(Browser):
                 self.browser_handler.execute_script("arguments[0].scrollIntoView();",last_user)
 
                 followers_len = len(followers_list)
-                if (followers_len >= limit):
-                    account_list = followers_list
-                    break
-                #prev_last = last_user
-                # if (followers_len >= limit) or (attempt > 10):
+                # if (followers_len >= limit):
                 #     account_list = followers_list
                 #     break
-                # elif followers_len == prev_len:
-                #     attempt+=1
-                # else:
-                #     prev_len = followers_len
+                prev_last = last_user
+                if (followers_len >= limit) or (attempt > 10):
+                    account_list = followers_list
+                    break
+                elif followers_len == prev_len:
+                    attempt+=1
+                else:
+                    prev_len = followers_len
 
 
             cont = 0
@@ -1594,6 +1594,7 @@ class IgBot(Browser):
                 if(cont >= limit):
                     break
                 print(account.text)
+                self.wait('small')
                 ac_span = account.find_element(By.CSS_SELECTOR, f'span[class="{AC_FOLLOWER_NAME_CLASSES}"]')
                 #ac_follow_bt = account.find_element(By.CSS_SELECTOR, f'button[class="{AC_FOLLOWER_FOLLOW_BT_CLASSES}"]')
                 ac_follow_bt = account.find_element(By.CSS_SELECTOR, f'div[class="_ap3a _aaco _aacw _aad6 _aade"]')
@@ -1604,7 +1605,7 @@ class IgBot(Browser):
                 following = ('Siguiendo' in ac_follow_bt.text) or ('Soli' in ac_follow_bt.text)
                 if not following:
                     ac_follow_bt.click()
-                self.wait('micro')
+                self.wait('small')
                 cont+=1
 
         except NoSuchElementException as e:
