@@ -258,7 +258,14 @@ class Browser:
             cache_manager = DriverCacheManager(WEBDRIVER_ROOT_PATH) #Especifica la ruta de descarga e instalacion del webdriver
             current_version = default_browser.get_chrome_version()
             warning('Actualizando webdriver...')
-            self.service = CService(ChromeDriverManager(driver_version=current_version, cache_manager=cache_manager).install())
+
+
+            chrome_install = ChromeDriverManager(driver_version=current_version, cache_manager=cache_manager).install()
+
+            folder = os.path.dirname(chrome_install)
+            chromedriver_path = os.path.join(folder, "chromedriver.exe")
+            
+            self.service = CService(chromedriver_path)
 
         else:
             self._patch_chromedriver()
